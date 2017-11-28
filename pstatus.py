@@ -3,10 +3,10 @@ from pysnmp.hlapi import *
 oid_ss_max_capacity = '1.3.6.1.2.1.43.11.1.1.8.1.1'
 oid_ss_supply_unit = '1.3.6.1.2.1.43.11.1.1.7.1.1'
 
-oid_ss_cyan = '1.3.6.1.2.1.43.11.1.1.9.1.1'
-oid_ss_magenta = '1.3.6.1.2.1.43.11.1.1.9.1.2'
-oid_ss_yellow = '1.3.6.1.2.1.43.11.1.1.9.1.3'
-oid_ss_black = '1.3.6.1.2.1.43.11.1.1.9.1.4'
+oid_ss_c_cyan = '1.3.6.1.2.1.43.11.1.1.9.1.1'
+oid_ss_c_magenta = '1.3.6.1.2.1.43.11.1.1.9.1.2'
+oid_ss_c_yellow = '1.3.6.1.2.1.43.11.1.1.9.1.3'
+oid_ss_c_black = '1.3.6.1.2.1.43.11.1.1.9.1.4'
 
 # 0 - 100 (to the nearest 10%)
 oid_ricoh_black = '1.3.6.1.4.1.367.3.2.1.2.24.1.1.5.1'
@@ -22,6 +22,10 @@ oid_ricoh_tray4 = '1.3.6.1.4.1.367.3.2.1.2.20.2.2.1.11.2.4'
 
 oid_ricoh_total_pcount = '1.3.6.1.4.1.367.3.2.1.2.19.1.0'
 
+oid_hp_bw_black = '1.3.6.1.2.1.43.11.1.1.9.1.1'
+oid_hp_max_capacity = '1.3.6.1.2.1.43.11.1.1.8.1.1'
+oid_hp_supply_unit = '1.3.6.1.2.1.43.11.1.1.7.1.1'
+
 printer_description = ObjectIdentity('SNMPv2-MIB', 'sysDescr', 0)
 
 def SamsungTonerPercantage(val):
@@ -30,13 +34,13 @@ def SamsungTonerPercantage(val):
 errorIndication, errorStatus, errorIndex, varBinds = next(
     getCmd(SnmpEngine(),
            CommunityData('public'),
-           UdpTransportTarget(('172.19.3.16', 161)),
+           UdpTransportTarget(('172.16.3.1', 161)),
            ContextData(),
-           ObjectType(ObjectIdentity(oid_ricoh_black)),
-           ObjectType(ObjectIdentity(oid_ricoh_cyan)),
-           ObjectType(ObjectIdentity(oid_ricoh_magenta)),
+           ObjectType(ObjectIdentity(oid_hp_bw_black)),
+           ObjectType(ObjectIdentity(oid_hp_max_capacity)),
+           ObjectType(ObjectIdentity(oid_hp_supply_unit)),
            ObjectType(ObjectIdentity(oid_ricoh_yellow)),
-           ObjectType(ObjectIdentity(oid_ricoh_total_pcount)))
+           ObjectType(printer_description))
 )
 
 if errorIndication:
