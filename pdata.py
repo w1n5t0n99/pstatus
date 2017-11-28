@@ -37,5 +37,5 @@ sbo_printers = [('172.25.10.14', 'Sbo-tech', 'hp_bw'),
                 ('172.25.10.12', 'Sbo-susan-office', 'ss_c'),
                 ('172.25.10.5', 'Sbo-copier-color', 'rc_cpr_c'),
                # ('172.25.10.6', 'Sbo-copier-b&w', 'rc_cpr'),
-                ('172.25.10.7', 'Sbo-color-4700', 'ss_c'),
+                ('172.25.10.7', 'Sbo-color-4700', 'hp_c'),
                 ('172.25.10.3', 'Sbo-4240-b&w', 'hp_bw')]
