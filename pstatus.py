@@ -1,4 +1,5 @@
 from pysnmp.hlapi import *
+import tkinter as tk
 import pdata
 
 oid_ss_max_capacity = '1.3.6.1.2.1.43.11.1.1.8.1.1'
@@ -141,7 +142,7 @@ def QueryPrinter(printer):
             return '', [varBinds[0][1], varBinds[1][1], varBinds[2][1], varBinds[3][1], varBinds[4][1]]
     else:
         return 'error', []
-
+'''
 
 for printer in pdata.rce_printers:
     error_status, pvals = QueryPrinter(printer)
@@ -201,7 +202,7 @@ for printer in pdata.sbo_printers:
                                                                   int(TonerPercantage(pvals[5], pvals[4])),
                                                                   int(TonerPercantage(pvals[7], pvals[6]))))
 
-
+'''
 '''
 errorIndication, errorStatus, errorIndex, varBinds = next(
     getCmd(SnmpEngine(),
@@ -224,3 +225,29 @@ else:
     for varBind in varBinds:
         print(' = '.join([x.prettyPrint() for x in varBind]))
 '''
+
+
+class Application(tk.Frame):
+    def __init__(self, master=None):
+        super().__init__(master)
+        self.pack()
+        self.create_widgets()
+
+    def create_widgets(self):
+        self.hi_there = tk.Button(self)
+        self.hi_there["text"] = "Hello World\n(click me)"
+        self.hi_there["command"] = self.say_hi
+        self.hi_there.pack(side="top")
+
+        self.quit = tk.Button(self, text="QUIT", fg="red",
+                              command=root.destroy)
+        self.quit.pack(side="bottom")
+
+    def say_hi(self):
+        print("hi there, everyone!")
+
+root = tk.Tk()
+app = Application(master=root)
+app.master.wm_maxsize(1000, 400)
+app.master.minsize(200, 100)
+app.mainloop()
