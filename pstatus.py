@@ -1,6 +1,9 @@
 from pysnmp.hlapi import *
+from collections import namedtuple
 import tkinter as tk
 import pdata
+
+PrinterData = namedtuple('printerdata', ['name', 'type', 'black', 'cyan', 'magenta', 'yellow'])
 
 oid_ss_max_capacity = '1.3.6.1.2.1.43.11.1.1.8.1.1'
 oid_ss_supply_unit = '1.3.6.1.2.1.43.11.1.1.7.1.1'
@@ -50,7 +53,7 @@ oid_supply_unit = '1.3.6.1.2.1.43.11.1.1.7.1.1'
 printer_description = ObjectIdentity('SNMPv2-MIB', 'sysDescr', 0)
 
 def TonerPercantage(toner_level, max_capacity):
-    return (toner_level / max_capacity) * 100
+    return int((toner_level / max_capacity) * 100)
 
 def QueryPrinter(printer):
     if printer[2] == 'hp_bw' or printer[2] == 'ss_bw':
@@ -142,6 +145,30 @@ def QueryPrinter(printer):
             return '', [varBinds[0][1], varBinds[1][1], varBinds[2][1], varBinds[3][1], varBinds[4][1]]
     else:
         return 'error', []
+
+def ProcessPrinters(printers):
+    process_printers = []
+    for printer in printers:
+        error_status, pvals = QueryPrinter(printer)
+        if error_status:
+            process_printers.append(PrinterData(printer[1],'printer unreachable', 0, 0, 0, 0))
+        elif printer[2] == 'ss_bw' or printer[2] == 'hp_bw':
+            process_printers.append(PrinterData(printer[1], printer[2], TonerPercantage(pvals[1], pvals[0]), 0, 0, 0))
+        elif printer[2] == 'rc_cpr':
+            process_printers.append(PrinterData(printer[1], printer[2], pvals[0], 0, 0, 0))
+        elif printer[2] == 'rc_cpr_c':
+            process_printers.append(PrinterData(printer[1], printer[2],
+                                                TonerPercantage(pvals[1], pvals[0]),
+                                                TonerPercantage(pvals[3], pvals[2]),
+                                                TonerPercantage(pvals[5], pvals[4]),
+                                                TonerPercantage(pvals[7], pvals[6])))
+        elif printer[2] == 'ss_c':
+            process_printers.append(PrinterData(printer[1], printer[2],
+                                                TonerPercantage(pvals[1], pvals[0]),
+                                                TonerPercantage(pvals[3], pvals[2]),
+                                                TonerPercantage(pvals[5], pvals[4]),
+                                                TonerPercantage(pvals[7], pvals[6])))
+    return None, process_printers
 '''
 
 for printer in pdata.rce_printers:
@@ -227,27 +254,12 @@ else:
 '''
 
 
-class Application(tk.Frame):
-    def __init__(self, master=None):
-        super().__init__(master)
-        self.pack()
-        self.create_widgets()
+error, proc_printers = ProcessPrinters(pdata.rce_printers)
+print(error)
+if error is None:
+    for p in proc_printers:
+        if p.type == 'hp_bw' or p.type == 'ss_bw':
+            print('%s - Black: %s' % (p.name, p.black))
+        elif p.type == 'ss_c':
+            print('%s - Black: %s Cyan: %s Magenta: %s Yellow: %s' % (p.name, p.black, p.cyan, p.magenta, p.yellow))
 
-    def create_widgets(self):
-        self.hi_there = tk.Button(self)
-        self.hi_there["text"] = "Hello World\n(click me)"
-        self.hi_there["command"] = self.say_hi
-        self.hi_there.pack(side="top")
-
-        self.quit = tk.Button(self, text="QUIT", fg="red",
-                              command=root.destroy)
-        self.quit.pack(side="bottom")
-
-    def say_hi(self):
-        print("hi there, everyone!")
-
-root = tk.Tk()
-app = Application(master=root)
-app.master.wm_maxsize(1000, 400)
-app.master.minsize(200, 100)
-app.mainloop()
