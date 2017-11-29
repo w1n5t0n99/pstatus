@@ -2,6 +2,7 @@ from pysnmp.hlapi import *
 from collections import namedtuple
 import tkinter as tk
 import pdata
+import printer_query
 
 PrinterData = namedtuple('printerdata', ['name', 'type', 'black', 'cyan', 'magenta', 'yellow'])
 
@@ -253,7 +254,10 @@ else:
         print(' = '.join([x.prettyPrint() for x in varBind]))
 '''
 
+presult = printer_query.QueryPrinter(pdata.rce_printers[2])
+print(presult.black)
 
+'''
 error, proc_printers = ProcessPrinters(pdata.rce_printers)
 print(error)
 if error is None:
@@ -263,3 +267,4 @@ if error is None:
         elif p.type == 'ss_c':
             print('%s - Black: %s Cyan: %s Magenta: %s Yellow: %s' % (p.name, p.black, p.cyan, p.magenta, p.yellow))
 
+'''
