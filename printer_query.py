@@ -140,48 +140,48 @@ def _QueryRicohColor(printer):
 def QueryPrinter(printer):
     if printer[2] == 'hp_bw' or printer[2] == 'ss_bw':
         if printer[2] == 'hp_bw':
-            errorIndication, errorStatus, errorIndex, varBinds = _QueryHpBw(printer)
+            error_indication, error_status, error_index, var_binds = _QueryHpBw(printer)
         elif printer[2] == 'ss_bw':
-            errorIndication, errorStatus, errorIndex, varBinds = _QuerySsBw(printer)
+            error_indication, error_status, error_index, var_binds = _QuerySsBw(printer)
 
-        if errorIndication or errorStatus:
+        if error_indication or error_status:
             return QueryResult(name=printer[1], type=printer[2], status='error', black=0, cyan=0, magenta=0, yellow=0)
         else:
             return QueryResult(name=printer[1], type=printer[2], status='ok',
-                               black=TonerPercentage(varBinds[1][1], varBinds[0][1]),
+                               black=TonerPercentage(var_binds[1][1], var_binds[0][1]),
                                cyan=0, magenta=0, yellow=0)
 
     elif printer[2] == 'ss_c' or printer[2] == 'hp_c':
         if printer[2] == 'ss_c':
-            errorIndication, errorStatus, errorIndex, varBinds = _QuerySsColor(printer)
+            error_indication, error_status, error_index, var_binds = _QuerySsColor(printer)
         elif  printer[2] == 'hp_c':
-            errorIndication, errorStatus, errorIndex, varBinds = _QueryHpColor(printer)
+            error_indication, error_status, error_index, var_binds = _QueryHpColor(printer)
 
-        if errorIndication or errorStatus:
+        if error_indication or error_status:
             return QueryResult(name=printer[1], type=printer[2], status='error', black=0, cyan=0, magenta=0, yellow=0)
         else:
             return QueryResult(name=printer[1], type=printer[2], status='ok',
-                               black=TonerPercentage(varBinds[1][1], varBinds[0][1]),
-                               cyan=TonerPercentage(varBinds[2][1], varBinds[3][1]),
-                               magenta=TonerPercentage(varBinds[4][1], varBinds[5][1]),
-                               yellow=TonerPercentage(varBinds[6][1], varBinds[7][1]))
+                               black=TonerPercentage(var_binds[1][1], var_binds[0][1]),
+                               cyan=TonerPercentage(var_binds[2][1], var_binds[3][1]),
+                               magenta=TonerPercentage(var_binds[4][1], var_binds[5][1]),
+                               yellow=TonerPercentage(var_binds[6][1], var_binds[7][1]))
     elif printer[2] == 'rc_cpr':
-        errorIndication, errorStatus, errorIndex, varBinds = _QueryRicohBw(printer)
-        if errorIndication or errorStatus:
+        error_indication, error_status, error_index, var_binds = _QueryRicohBw(printer)
+        if error_indication or error_status:
             return QueryResult(name=printer[1], type=printer[2], status='error', black=0, cyan=0, magenta=0, yellow=0)
         else:
-            return QueryResult(name=printer[1], type=printer[2], status='ok', black=varBinds[1][1],
+            return QueryResult(name=printer[1], type=printer[2], status='ok', black=var_binds[1][1],
                                cyan=0, magenta=0, yellow=0)
     elif printer[2] == 'rc_cpr_c':
-        errorIndication, errorStatus, errorIndex, varBinds = _QueryRicohColor(printer)
-        if errorIndication or errorStatus:
+        error_indication, error_status, error_index, var_binds = _QueryRicohColor(printer)
+        if error_indication or error_status:
             return QueryResult(name=printer[1], type=printer[2], status='error', black=0, cyan=0, magenta=0, yellow=0)
         else:
             return QueryResult(name=printer[1], type=printer[2], status='ok',
-                               black=TonerPercentage(varBinds[1][1], varBinds[0][1]),
-                               cyan=TonerPercentage(varBinds[2][1], varBinds[0][1]),
-                               magenta=TonerPercentage(varBinds[3][1], varBinds[0][1]),
-                               yellow=TonerPercentage(varBinds[4][1], varBinds[0][1]))
+                               black=TonerPercentage(var_binds[1][1], var_binds[0][1]),
+                               cyan=TonerPercentage(var_binds[2][1], var_binds[0][1]),
+                               magenta=TonerPercentage(var_binds[3][1], var_binds[0][1]),
+                               yellow=TonerPercentage(var_binds[4][1], var_binds[0][1]))
     else:
         return QueryResult(name=printer[1], type=printer[2], status='error', black=0, cyan=0, magenta=0, yellow=0)
 

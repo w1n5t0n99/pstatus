@@ -254,7 +254,7 @@ else:
         print(' = '.join([x.prettyPrint() for x in varBind]))
 '''
 
-presult = printer_query.QueryPrinter(pdata.rce_printers[2])
+presult = printer_query.QueryPrinter(pdata.rce_printers[4])
 print(presult.black)
 
 '''
@@ -268,3 +268,20 @@ if error is None:
             print('%s - Black: %s Cyan: %s Magenta: %s Yellow: %s' % (p.name, p.black, p.cyan, p.magenta, p.yellow))
 
 '''
+
+errorIndication, errorStatus, errorIndex, varBinds = next(
+    getCmd(SnmpEngine(),
+           CommunityData('public'),
+           UdpTransportTarget(('172.16.3.12', 161)),
+           ContextData(),
+           ObjectType(ObjectIdentity('1.3.6.1.4.1.236.11.5.11.55.5.1.6')))
+)
+
+if errorIndication:
+    print(errorIndication)
+elif errorStatus:
+    print('%s at %s' % (errorStatus.prettyPrint(),
+                        errorIndex and varBinds[int(errorIndex) - 1][0] or '?'))
+else:
+    for varBind in varBinds:
+        print(' = '.join([x.prettyPrint() for x in varBind]))
