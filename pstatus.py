@@ -4,13 +4,21 @@ import threading
 import printer_query
 import printer_db
 
+import sys
+import os
+try:
+    sys.path.append(os.path.join(sys.MEIPOASS, 'out00-PYZ.pyz'))
+except:
+    pass
+
 name_width = 25
 level_width = 6
 total_column = 5
 
 root = tk.Tk()
 root.title('Printer Status')
-root.minsize(width=300, height= 500)
+root.minsize(width=375, height= 500)
+root.resizable(width=False, height=False)
 
 printers = printer_db.LoadDB('printers.txt')
 printer_rows = []
@@ -33,6 +41,9 @@ def InitLabels(printers):
     printer_rows.append(l2)
     printer_rows.append(l3)
     printer_rows.append(l4)
+
+    if printers == None:
+        return
 
     r = 1
     for p in printers:
@@ -81,10 +92,14 @@ def UpdateLabel(level, row, column):
                  fg='black' if abs(level) >= 10 else '#ff3232')
     else:
         b.set(level)
-        pl.config(textvariable=b, width=level_width)
+        if level == 'Error':
+            pl.config(textvariable=b, width=level_width, fg='#ff3232')
+        else:
+            pl.config(textvariable=b, width=level_width)
 
 
-def AddLabels(printers):
+
+def UpdateLabels(printers):
     r=1
 
     for p in printers:
@@ -95,15 +110,19 @@ def AddLabels(printers):
             UpdateLabel(level=pres.cyan, row=r, column=2)
             UpdateLabel(level=pres.magenta, row=r, column=3)
             UpdateLabel(level=pres.yellow, row=r, column=4)
-            r+=1
         else:
             if pres.black != -3:
                 UpdateLabel(level=pres.black, row=r, column=1)
             else:
                 UpdateLabel(level='OK', row=r, column=1)
-            r += 1
+
+        if pres.status == 'error':
+            UpdateLabel(level='Error', row=r, column=1)
+
+        r += 1
 
 
 InitLabels(printers)
-threading.Thread(target=AddLabels, args=(printers,), daemon=True).start()
+if printers != None:
+    threading.Thread(target=UpdateLabels, args=(printers,), daemon=True).start()
 root.mainloop()
