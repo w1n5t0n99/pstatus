@@ -54,8 +54,12 @@ oid_hp_bw_mc = '1.3.6.1.2.1.43.11.1.1.8.1.1'
 
 QueryResult = namedtuple('queryresult', ['name', 'type', 'status', 'black', 'cyan', 'magenta', 'yellow', 'model'])
 
+def Clamp(n, minn, maxn):
+    return max(min(maxn, n), minn)
+
 def TonerPercentage(toner_level, max_capacity):
-    return int((toner_level / max_capacity) * 100)
+    level = int(toner_level / max_capacity * 100)
+    return Clamp(level, 0, 100)
 
 def _QueryHpBw(printer):
     error_indication, error_status, error_index, var_binds = next(
