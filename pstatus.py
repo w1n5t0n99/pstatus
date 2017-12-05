@@ -77,6 +77,9 @@ def InitLabels(printers):
         printer_rows.append(l4)
         r +=1
 
+    button = tk.Button(root, text='Refresh', width=level_width, command=AsyncUpdateLablels)
+    button.grid(row=r, column=4)
+
 
 def UpdateLabel(level, row, column):
     pl = printer_rows[(row*total_column)+column]
@@ -116,8 +119,25 @@ def UpdateLabels(printers):
 
         r += 1
 
+def ClearLabels():
+    r = 1
+    for p in printers:
+        UpdateLabel(level=' ', row=r, column=1)
+        UpdateLabel(level=' ', row=r, column=2)
+        UpdateLabel(level=' ', row=r, column=3)
+        UpdateLabel(level=' ', row=r, column=4)
+        r += 1
+
+def AsyncUpdateLablels():
+    for thread in threading.enumerate():
+        if thread.name == 'update_thread':
+            return
+        else:
+            ClearLabels()
+            threading.Thread(name='update_thread', target=UpdateLabels, args=(printers,), daemon=True).start()
+
 
 InitLabels(printers)
 if printers != None:
-    threading.Thread(target=UpdateLabels, args=(printers,), daemon=True).start()
+    threading.Thread(name='update_thread', target=UpdateLabels, args=(printers,), daemon=True).start()
 root.mainloop()
