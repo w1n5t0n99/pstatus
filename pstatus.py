@@ -4,13 +4,6 @@ import threading
 import printer_query
 import printer_db
 
-import sys
-import os
-try:
-    sys.path.append(os.path.join(sys.MEIPOASS, 'out00-PYZ.pyz'))
-except:
-    pass
-
 name_width = 25
 level_width = 6
 total_column = 5
@@ -43,6 +36,8 @@ def InitLabels(printers):
     printer_rows.append(l4)
 
     if printers == None:
+        l4 = tk.Label(root, text='Printers not found, make sure file named printers.txt\nin same directory as .exe', width=name_width + (level_width*4), bg='green')
+        l4.grid(row=1, column=0, columnspan=5, rowspan=2, sticky='we')
         return
 
     r = 1
