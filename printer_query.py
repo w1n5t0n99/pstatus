@@ -1,5 +1,7 @@
 from pysnmp.hlapi import *
 from collections import namedtuple
+import threading
+import queue
 
 oid_ss_c_yellow = '1.3.6.1.2.1.43.11.1.1.9.1.1'
 oid_ss_c_magenta = '1.3.6.1.2.1.43.11.1.1.9.1.2'
@@ -54,6 +56,9 @@ oid_hp_bw_mc = '1.3.6.1.2.1.43.11.1.1.8.1.1'
 
 QueryResult = namedtuple('queryresult', ['name', 'type', 'status', 'black', 'cyan', 'magenta', 'yellow', 'model'])
 
+query_results = []
+thread_lock = threading.Lock()
+
 def Clamp(n, minn, maxn):
     return max(min(maxn, n), minn)
 
@@ -87,6 +92,21 @@ def _QuerySsBw(printer):
 
     return error_indication, error_status, error_index, var_binds
 
+def _AsyncQuerySsBw(printer):
+    error_indication, error_status, error_index, var_binds = next(
+        getCmd(SnmpEngine(),
+               CommunityData('public'),
+               UdpTransportTarget((printer[0], 161)),
+               ContextData(),
+               ObjectType(ObjectIdentity(oid_ss_bw_mc)),
+               ObjectType(ObjectIdentity(oid_ss_bw_black)),
+               ObjectType(ObjectIdentity(oid_ss_model)))
+    )
+
+    thread_lock.acquire()
+    query_results.append((error_indication, error_status, error_index, var_binds))
+    thread_lock.release()
+
 def _QuerySsColor(printer):
     error_indication, error_status, error_index, var_binds = next(
         getCmd(SnmpEngine(),
@@ -105,6 +125,26 @@ def _QuerySsColor(printer):
     )
 
     return error_indication, error_status, error_index, var_binds
+
+def _AsyncQuerySsColor(printer):
+    error_indication, error_status, error_index, var_binds = next(
+        getCmd(SnmpEngine(),
+               CommunityData('public'),
+               UdpTransportTarget((printer[0], 161)),
+               ContextData(),
+               ObjectType(ObjectIdentity(oid_ss_c_black_mc)),
+               ObjectType(ObjectIdentity(oid_ss_c_black)),
+               ObjectType(ObjectIdentity(oid_ss_c_cyan_mc)),
+               ObjectType(ObjectIdentity(oid_ss_c_cyan)),
+               ObjectType(ObjectIdentity(oid_ss_c_magenta_mc)),
+               ObjectType(ObjectIdentity(oid_ss_c_magenta)),
+               ObjectType(ObjectIdentity(oid_ss_c_yellow_mc)),
+               ObjectType(ObjectIdentity(oid_ss_c_yellow)),
+               ObjectType(ObjectIdentity(oid_ss_model)))
+    )
+    thread_lock.acquire()
+    query_results.append((error_indication, error_status, error_index, var_binds))
+    thread_lock.release()
 
 def _QueryHpColor(printer):
     error_indication, error_status, error_index, var_binds = next(
@@ -210,3 +250,11 @@ def QueryPrinter(printer):
                            model='error')
 
 
+def AsyncQueryPrinters(printers, num_threads):
+    t0 = threading.Thread(name='q0', target=_AsyncQuerySsBw, args=(printers[0],))
+    t1 = threading.Thread(name='q1', target=_AsyncQuerySsColor, args=(printers[1],))
+
+    t0.start()
+    t1.start()
+    t0.join()
+    t1.join()

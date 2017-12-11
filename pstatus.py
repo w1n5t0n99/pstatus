@@ -8,14 +8,6 @@ name_width = 25
 level_width = 6
 total_column = 5
 
-root = tk.Tk()
-root.title('Printer Status')
-root.minsize(width=375, height= 500)
-root.resizable(width=False, height=False)
-
-printers = printer_db.LoadDB('printers.txt')
-printer_rows = []
-
 def InitLabels(printers):
     r = 0
     l0 = tk.Label(root, text='Name', width=name_width, bg='gray')
@@ -137,7 +129,21 @@ def AsyncUpdateLablels():
             threading.Thread(name='update_thread', target=UpdateLabels, args=(printers,), daemon=True).start()
 
 
+root = tk.Tk()
+root.title('Printer Status')
+root.minsize(width=375, height= 500)
+root.resizable(width=False, height=False)
+
+printers = printer_db.LoadDB('printers.txt')
+printer_rows = []
+
+'''
 InitLabels(printers)
 if printers != None:
     threading.Thread(name='update_thread', target=UpdateLabels, args=(printers,), daemon=True).start()
 root.mainloop()
+'''
+
+printer_query.AsyncQueryPrinters(printers, 2)
+for p in printer_query.query_results:
+    print(p[3][0][1])
