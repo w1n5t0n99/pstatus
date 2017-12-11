@@ -146,4 +146,4 @@ root.mainloop()
 
 printer_query.AsyncQueryPrinters(printers, 2)
 for p in printer_query.query_results:
-    print(p[3][0][1])
+    print(p[3][3][1])
