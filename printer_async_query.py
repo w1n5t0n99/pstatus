@@ -50,7 +50,7 @@ oid_ss_bw_black = '1.3.6.1.2.1.43.11.1.1.9.1.1'
 
 oid_hp_supply_unit = '1.3.6.1.2.1.43.11.1.1.7.1.1'
 oid_hp_model = '1.3.6.1.2.1.25.3.2.1.3.1'
-oid_hp_name = '1.3.6.1.2.1.43.5.1.1.16.1'
+oid_hp_name = '1.3.6.1.4.1.11.2.3.9.4.2.1.1.3.10'
 
 oid_ss_supply_unit = '1.3.6.1.2.1.43.11.1.1.7.1.1'
 oid_ss_model = '1.3.6.1.2.1.25.3.2.1.3.1'
@@ -93,7 +93,7 @@ def _QueryHpBw(printer):
         qr = ErrorQueryResult('{} at {}'.format(error_status.prettyPrint(),
                                       error_index and var_binds[-1][int(error_index) - 1] or '?'))
     else:
-        qr = QueryResult(name=printer[2], type=printer[2], status='ok',
+        qr = QueryResult(name=printer[1], type=printer[2], status='ok',
                          black=TonerPercentage(var_binds[1][1], var_binds[0][1]),
                          cyan=0, magenta=0, yellow=0, model=var_binds[2][1])
 
@@ -117,7 +117,7 @@ def _QuerySsBw(printer):
         qr = ErrorQueryResult('{} at {}'.format(error_status.prettyPrint(),
                                       error_index and var_binds[-1][int(error_index) - 1] or '?'))
     else:
-        qr = QueryResult(name=var_binds[3][1], type=printer[2], status='ok',
+        qr = QueryResult(name=printer[1], type=printer[2], status='ok',
                          black=TonerPercentage(var_binds[1][1], var_binds[0][1]),
                          cyan=0, magenta=0, yellow=0, model=var_binds[2][1])
 
@@ -141,18 +141,19 @@ def _QuerySsColor(printer):
                ObjectType(ObjectIdentity(oid_ss_name)))
     )
 
-    qr = QueryResult(var_binds[9][1], type=printer[2], status='ok',
-                     black=TonerPercentage(var_binds[1][1], var_binds[0][1]),
-                     cyan=TonerPercentage(var_binds[3][1], var_binds[2][1]),
-                     magenta=TonerPercentage(var_binds[5][1], var_binds[4][1]),
-                     yellow=TonerPercentage(var_binds[7][1], var_binds[6][1]),
-                     model=var_binds[8][1])
-
     if error_indication:
-        qr.status = error_indication
+        qr = ErrorQueryResult(error_indication)
     elif error_status:
-        qr.status = '{} at {}'.format(error_status.prettyPrint(),
-                                      error_index and var_binds[-1][int(error_index) - 1] or '?')
+        qr = ErrorQueryResult('{} at {}'.format(error_status.prettyPrint(),
+                                      error_index and var_binds[-1][int(error_index) - 1] or '?'))
+    else:
+        qr = QueryResult(printer[1], type=printer[2], status='ok',
+                        black=TonerPercentage(var_binds[1][1], var_binds[0][1]),
+                        cyan=TonerPercentage(var_binds[3][1], var_binds[2][1]),
+                        magenta=TonerPercentage(var_binds[5][1], var_binds[4][1]),
+                        yellow=TonerPercentage(var_binds[7][1], var_binds[6][1]),
+                        model=var_binds[8][1])
+
 
     return qr
 
@@ -174,18 +175,18 @@ def _QueryHpColor(printer):
                ObjectType(ObjectIdentity(oid_hp_name)))
     )
 
-    qr = QueryResult(var_binds[9][1], type=printer[2], status='ok',
-                     black=TonerPercentage(var_binds[1][1], var_binds[0][1]),
-                     cyan=TonerPercentage(var_binds[3][1], var_binds[2][1]),
-                     magenta=TonerPercentage(var_binds[5][1], var_binds[4][1]),
-                     yellow=TonerPercentage(var_binds[7][1], var_binds[6][1]),
-                     model=var_binds[8][1])
-
     if error_indication:
-        qr.status = error_indication
+        qr = ErrorQueryResult(error_indication)
     elif error_status:
-        qr.status = '{} at {}'.format(error_status.prettyPrint(),
-                                      error_index and var_binds[-1][int(error_index) - 1] or '?')
+        qr = ErrorQueryResult('{} at {}'.format(error_status.prettyPrint(),
+                                      error_index and var_binds[-1][int(error_index) - 1] or '?'))
+    else:
+        qr = QueryResult(printer[1], type=printer[2], status='ok',
+                         black=TonerPercentage(var_binds[1][1], var_binds[0][1]),
+                         cyan=TonerPercentage(var_binds[3][1], var_binds[2][1]),
+                         magenta=TonerPercentage(var_binds[5][1], var_binds[4][1]),
+                         yellow=TonerPercentage(var_binds[7][1], var_binds[6][1]),
+                        model=var_binds[8][1])
 
     return qr
 
@@ -201,14 +202,14 @@ def _QueryRicohBw(printer):
                ObjectType(ObjectIdentity(oid_ricoh_name)))
     )
 
-    qr = QueryResult(name=var_binds[3][1], type=printer[2], status='ok', black=var_binds[1][1],
-                     cyan=0, magenta=0, yellow=0, model=var_binds[2][1])
-
     if error_indication:
-        qr.status = error_indication
+        qr = ErrorQueryResult(error_indication)
     elif error_status:
-        qr.status = '{} at {}'.format(error_status.prettyPrint(),
-                                      error_index and var_binds[-1][int(error_index) - 1] or '?')
+        qr = ErrorQueryResult('{} at {}'.format(error_status.prettyPrint(),
+                                      error_index and var_binds[-1][int(error_index) - 1] or '?'))
+    else:
+        qr = QueryResult(name=printer[1], type=printer[2], status='ok', black=var_binds[1][1],
+                         cyan=0, magenta=0, yellow=0, model=var_binds[2][1])
 
     return qr
 
@@ -227,18 +228,18 @@ def _QueryRicohColor(printer):
                ObjectType(ObjectIdentity(oid_ricoh_name)))
     )
 
-    qr = QueryResult(name=var_binds[6][1], type=printer[2], status='ok',
-                     black=TonerPercentage(var_binds[1][1], var_binds[0][1]),
-                     cyan=TonerPercentage(var_binds[2][1], var_binds[0][1]),
-                     magenta=TonerPercentage(var_binds[3][1], var_binds[0][1]),
-                     yellow=TonerPercentage(var_binds[4][1], var_binds[0][1]),
-                     model=var_binds[5][1])
-
     if error_indication:
-        qr.status = error_indication
+        qr = ErrorQueryResult(error_indication)
     elif error_status:
-        qr.status = '{} at {}'.format(error_status.prettyPrint(),
-                                      error_index and var_binds[-1][int(error_index) - 1] or '?')
+        qr = ErrorQueryResult('{} at {}'.format(error_status.prettyPrint(),
+                                      error_index and var_binds[-1][int(error_index) - 1] or '?'))
+    else:
+        qr = QueryResult(name=printer[1], type=printer[2], status='ok',
+                         black=TonerPercentage(var_binds[1][1], var_binds[0][1]),
+                         cyan=TonerPercentage(var_binds[2][1], var_binds[0][1]),
+                         magenta=TonerPercentage(var_binds[3][1], var_binds[0][1]),
+                         yellow=TonerPercentage(var_binds[4][1], var_binds[0][1]),
+                        model=var_binds[5][1])
 
     return qr
 
@@ -251,8 +252,6 @@ class QueryThread (threading.Thread):
         self.threadID = 'thread {}'.format(id)
 
     def run(self):
-        print('thread {}: {}'.format(self.id, self.printer_data[1]))
-
         if self.printer_data[2] == 'hp_bw':
             qr = _QueryHpBw(self.printer_data)
         elif self.printer_data[2] == 'ss_bw':
@@ -303,6 +302,5 @@ class PStatusThread (threading.Thread):
                 q_thread_id += 1
                 self.printers.task_done()
 
-        print('wating for threads to finish...')
         for qt in thread_list:
             qt.join()

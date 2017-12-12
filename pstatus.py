@@ -117,9 +117,6 @@ def AsyncUpdateLabels(printers):
     ps_thread.start()
     ps_thread.join()
 
-    print('==============================')
-    for qr in printer_async_query.query_results:
-        print('name: {} b: {} c: {} m: {} y: {}'.format(qr.name, qr.black, qr.cyan, qr.magenta, qr.yellow))
     r = 1
     for pres in printer_async_query.query_results:
         if '_color' in pres.type:
@@ -156,6 +153,8 @@ root.resizable(width=False, height=False)
 printers = printer_db.LoadDBQueue('printers.txt')
 printer_rows = []
 
+oid = '1.3.6.1.2.1.25.3.5.1.2.1'
+printer_query.DebugQueryPrinter('172.16.3.4', oid)
 
 InitLabels(printers)
 if printers != None:
