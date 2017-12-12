@@ -3,6 +3,7 @@ import threading
 
 import printer_query
 import printer_db
+import printer_async_query
 
 name_width = 25
 level_width = 6
@@ -27,13 +28,13 @@ def InitLabels(printers):
     printer_rows.append(l3)
     printer_rows.append(l4)
 
-    if printers == None:
+    if printers.empty():
         l4 = tk.Label(root, text='Printers not found, make sure file named printers.txt\nin same directory as .exe', width=name_width + (level_width*4), bg='green')
         l4.grid(row=1, column=0, columnspan=5, rowspan=2, sticky='we')
         return
 
     r = 1
-    for p in printers:
+    for p in list(printers.queue):
         m = tk.StringVar()
         m.set('{0}'.format(p[1]))
 
@@ -69,7 +70,7 @@ def InitLabels(printers):
         printer_rows.append(l4)
         r +=1
 
-    button = tk.Button(root, text='Refresh', width=level_width, command=AsyncUpdateLablels)
+    button = tk.Button(root, text='Refresh', width=level_width, command=AsyncUpdateLabels)
     button.grid(row=r, column=4)
 
 
@@ -111,39 +112,50 @@ def UpdateLabels(printers):
 
         r += 1
 
+def AsyncUpdateLabels(printers):
+    ps_thread = printer_async_query.PStatusThread('status-thread', printers)
+    ps_thread.start()
+    ps_thread.join()
+
+    r = 1
+    for pres in printer_async_query.query_results:
+        if '_color' in pres.type:
+
+            UpdateLabel(level=pres.black, row=r, column=1)
+            UpdateLabel(level=pres.cyan, row=r, column=2)
+            UpdateLabel(level=pres.magenta, row=r, column=3)
+            UpdateLabel(level=pres.yellow, row=r, column=4)
+        else:
+            if pres.black != -3:
+                UpdateLabel(level=pres.black, row=r, column=1)
+            else:
+                UpdateLabel(level='OK', row=r, column=1)
+
+        if pres.status == 'error':
+            UpdateLabel(level='Error', row=r, column=1)
+
+        r += 1
+
 def ClearLabels():
     r = 1
-    for p in printers:
+    for p in list(printers.queue):
         UpdateLabel(level=' ', row=r, column=1)
         UpdateLabel(level=' ', row=r, column=2)
         UpdateLabel(level=' ', row=r, column=3)
         UpdateLabel(level=' ', row=r, column=4)
         r += 1
 
-def AsyncUpdateLablels():
-    for thread in threading.enumerate():
-        if thread.name == 'update_thread':
-            return
-        else:
-            ClearLabels()
-            threading.Thread(name='update_thread', target=UpdateLabels, args=(printers,), daemon=True).start()
-
-
 root = tk.Tk()
 root.title('Printer Status')
 root.minsize(width=375, height= 500)
 root.resizable(width=False, height=False)
 
-printers = printer_db.LoadDB('printers.txt')
+printers = printer_db.LoadDBQueue('printers.txt')
 printer_rows = []
 
-'''
+
 InitLabels(printers)
 if printers != None:
-    threading.Thread(name='update_thread', target=UpdateLabels, args=(printers,), daemon=True).start()
+    threading.Thread(name='update_thread', target=AsyncUpdateLabels, args=(printers,), daemon=True).start()
 root.mainloop()
-'''
 
-printer_query.AsyncQueryPrinters(printers, 2)
-for p in printer_query.query_results:
-    print(p[3][3][1])
