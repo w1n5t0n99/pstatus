@@ -234,4 +234,26 @@ def DebugQueryPrinter(ip, oid):
         qr = ErrorQueryResult('{} at {}'.format(error_status.prettyPrint(),
                                                 error_index and var_binds[-1][int(error_index) - 1] or '?'))
     else:
-        print('oid: {}'.format(binascii.a2b_uu(var_binds[0][1])))
+        val = str(var_binds[0][1])
+        print('oid: {}'.format(' '.join(map(bin,bytearray(val,'utf8')))))
+
+def DebugQueryWalk(ip):
+    for (errorIndication,
+         errorStatus,
+         errorIndex,
+         varBinds) in nextCmd(SnmpEngine(),
+                              CommunityData('public'),
+                              UdpTransportTarget((ip, 161)),
+                              ContextData(),
+                              ObjectType(ObjectIdentity('IF-MIB'))):
+
+        if errorIndication:
+            print(errorIndication)
+            break
+        elif errorStatus:
+            print('%s at %s' % (errorStatus.prettyPrint(),
+                                errorIndex and varBinds[int(errorIndex) - 1][0] or '?'))
+            break
+        else:
+            for varBind in varBinds:
+                print(varBind)

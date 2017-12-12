@@ -144,20 +144,19 @@ def ClearLabels():
         UpdateLabel(level=' ', row=r, column=3)
         UpdateLabel(level=' ', row=r, column=4)
         r += 1
-
+'''
 root = tk.Tk()
 root.title('Printer Status')
 root.minsize(width=375, height= 500)
 root.resizable(width=False, height=False)
-
+'''
 printers = printer_db.LoadDBQueue('printers.txt')
 printer_rows = []
-
-oid = '1.3.6.1.2.1.25.3.5.1.2.1'
-printer_query.DebugQueryPrinter('172.16.3.4', oid)
-
+'''
 InitLabels(printers)
 if printers != None:
     threading.Thread(name='update_thread', target=AsyncUpdateLabels, args=(printers,), daemon=True).start()
 root.mainloop()
-
+'''
+oid = '1.3.6.1.2.1.25.3.5.1.2'
+printer_query.DebugQueryWalk('172.19.3.11')
