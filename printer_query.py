@@ -122,8 +122,7 @@ def _QuerySsColor(printer):
                ObjectType(ObjectIdentity(oid_ss_c_magenta)),
                ObjectType(ObjectIdentity(oid_ss_c_yellow_mc)),
                ObjectType(ObjectIdentity(oid_ss_c_yellow)),
-               ObjectType(ObjectIdentity(oid_ss_model)),
-               ObjectType(ObjectIdentity(oid_ss_name)))
+               ObjectType(ObjectIdentity(oid_ss_model)))
     )
 
     return error_indication, error_status, error_index, var_binds
@@ -142,7 +141,8 @@ def _AsyncQuerySsColor(printer):
                ObjectType(ObjectIdentity(oid_ss_c_magenta)),
                ObjectType(ObjectIdentity(oid_ss_c_yellow_mc)),
                ObjectType(ObjectIdentity(oid_ss_c_yellow)),
-               ObjectType(ObjectIdentity(oid_ss_model)))
+               ObjectType(ObjectIdentity(oid_ss_model)),
+               ObjectType(ObjectIdentity(oid_ss_name)))
     )
     thread_lock.acquire()
     query_results.append((error_indication, error_status, error_index, var_binds))

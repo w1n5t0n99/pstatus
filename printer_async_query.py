@@ -252,24 +252,19 @@ class QueryThread (threading.Thread):
 
     def run(self):
         print('thread {}: {}'.format(self.id, self.printer_data[1]))
-        if self.printer_data[2] == 'hp_bw' or self.printer_data[2] == 'ss_bw':
-            if self.printer_data[2] == 'hp_bw':
-                qr = _QueryHpBw(self.printer_data)
-            elif self.printer_data[2] == 'ss_bw':
-                qr = _QuerySsBw(self.printer_data)
 
-        elif self.printer_data[2] == 'ss_color' or self.printer_data[2] == 'hp_color':
-            if self.printer_data[2] == 'ss_color':
-                qr = _QuerySsColor(self.printer_data)
-            elif self.printer_data[2] == 'hp_color':
-                qr = _QueryHpColor(self.printer_data)
-
+        if self.printer_data[2] == 'hp_bw':
+            qr = _QueryHpBw(self.printer_data)
+        elif self.printer_data[2] == 'ss_bw':
+            qr = _QuerySsBw(self.printer_data)
+        elif self.printer_data[2] == 'ss_color':
+            qr = _QuerySsColor(self.printer_data)
+        elif self.printer_data[2] == 'hp_color':
+            qr = _QueryHpColor(self.printer_data)
         elif self.printer_data[2] == 'rc_cpr':
             qr = _QueryRicohBw(self.printer_data)
-
         elif self.printer_data[2] == 'rc_cpr_color':
             qr = _QueryRicohColor(self.printer_data)
-
         else:
             qr = QueryResult(name=self.printer_data[1], type=self.printer_data[2],
                              status='error - {} - not recognized type'.format(self.printer_data[2]),
@@ -308,5 +303,6 @@ class PStatusThread (threading.Thread):
                 q_thread_id += 1
                 self.printers.task_done()
 
+        print('wating for threads to finish...')
         for qt in thread_list:
             qt.join()

@@ -74,19 +74,19 @@ def InitLabels(printers):
     button.grid(row=r, column=4)
 
 
-def UpdateLabel(level, row, column):
+def UpdateLabel(level, row, column, lwidth=level_width):
     pl = printer_rows[(row*total_column)+column]
     b = tk.StringVar()
     if isinstance(level, int):
         b.set('{0}'.format(level))
-        pl.config(textvariable=b, width=level_width,
+        pl.config(textvariable=b, width=lwidth,
                  fg='black' if abs(level) >= 10 else '#ff3232')
     else:
         b.set(level)
         if level == 'Error':
-            pl.config(textvariable=b, width=level_width, fg='#ff3232')
+            pl.config(textvariable=b, width=lwidth, fg='#ff3232')
         else:
-            pl.config(textvariable=b, width=level_width)
+            pl.config(textvariable=b, width=lwidth)
 
 
 
@@ -117,10 +117,13 @@ def AsyncUpdateLabels(printers):
     ps_thread.start()
     ps_thread.join()
 
+    print('==============================')
+    for qr in printer_async_query.query_results:
+        print('name: {} b: {} c: {} m: {} y: {}'.format(qr.name, qr.black, qr.cyan, qr.magenta, qr.yellow))
     r = 1
     for pres in printer_async_query.query_results:
         if '_color' in pres.type:
-
+            UpdateLabel(level=pres.name, row=r, column=0, lwidth=name_width)
             UpdateLabel(level=pres.black, row=r, column=1)
             UpdateLabel(level=pres.cyan, row=r, column=2)
             UpdateLabel(level=pres.magenta, row=r, column=3)
