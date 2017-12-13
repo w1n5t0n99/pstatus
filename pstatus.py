@@ -76,7 +76,7 @@ def SetAsErrorRow(row, msg):
 
         m = tk.StringVar()
         m.set('{0}'.format(msg))
-        ui_row[0].config(textvariable=m, width=_NAME_WIDTH + (_LEVEL_WIDTH * 4), bg='green')
+        ui_row[0].config(textvariable=m, width=_NAME_WIDTH, bg='green')
         ui_row[0].grid(row=row, column=0, columnspan=5, rowspan=2, sticky='we')
 
 
@@ -206,26 +206,26 @@ if printers != None:
     threading.Thread(name='update_thread', target=AsyncUpdateLabels, args=(printers,), daemon=True).start()
 '''
 
-l0 = tk.Label(root, text='Name', width=_NAME_WIDTH, bg='gray')
-l0.grid(row=0, column=0)
-l1 = tk.Label(root, text='Black', width=_LEVEL_WIDTH, bg='gray')
-l1.grid(row=0, column=1)
-l2 = tk.Label(root, text='Cyan', width=_LEVEL_WIDTH, bg='#00ffff')
-l2.grid(row=0, column=2)
-l3 = tk.Label(root, text='Magenta', width=_LEVEL_WIDTH, bg='#ff00ff')
-l3.grid(row=0, column=3)
-l4 = tk.Label(root, text='Yellow', width=_LEVEL_WIDTH, bg='#ffff00')
-l4.grid(row=0, column=4)
+for i in range(0,2):
+    l0 = tk.Label(root, text='Name', width=_NAME_WIDTH, bg='gray')
+    l0.grid(row=i, column=0)
+    l1 = tk.Label(root, text='Black', width=_LEVEL_WIDTH, bg='gray')
+    l1.grid(row=i, column=1)
+    l2 = tk.Label(root, text='Cyan', width=_LEVEL_WIDTH, bg='#00ffff')
+    l2.grid(row=i, column=2)
+    l3 = tk.Label(root, text='Magenta', width=_LEVEL_WIDTH, bg='#ff00ff')
+    l3.grid(row=i, column=3)
+    l4 = tk.Label(root, text='Yellow', width=_LEVEL_WIDTH, bg='#ffff00')
+    l4.grid(row=i, column=4)
 
-r = []
-r.append(l0)
-r.append(l1)
-r.append(l2)
-r.append(l3)
-r.append(l4)
-r.append('gray')
-
-_ui_status_rows.append(r)
+    r = []
+    r.append(l0)
+    r.append(l1)
+    r.append(l2)
+    r.append(l3)
+    r.append(l4)
+    r.append('gray')
+    _ui_status_rows.append(r)
 
 SetAsStatusRow(0, 'test name', 55, 44, 33, 22)
 SetAsErrorRow(0, 'test error row')
