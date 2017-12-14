@@ -120,7 +120,7 @@ def InitLabels(printers):
         l4 = tk.Label(root, text=' ', width=_LEVEL_WIDTH)
         l4.grid(row=r, column=4)
 
-        orig_color = l0.cget('background')
+        orig_color = '#C0C0C0'
         alt_color = 'white'
 
         if r%2 == 0:
