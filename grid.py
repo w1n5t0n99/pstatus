@@ -9,7 +9,8 @@ def ToStringVar(data):
     return sv
 
 class GridHeaderRow:
-    def __init__(self):
+    def __init__(self, root):
+        self._root = root
         self._row = 0
         self._ws = []
         # add header
@@ -24,15 +25,16 @@ class GridHeaderRow:
         widths = [_NAME_WIDTH, _VAL_WIDTH, _VAL_WIDTH, _VAL_WIDTH, _VAL_WIDTH]
         bgs = ['gray', 'gray', '#00ffff', '#ff00ff', '#ffff00']
         for i in range(5):
-            l = tk.Label(root, textvariable=ToStringVar(ids[i]), bg=bgs[i], width=widths[i])
+            l = tk.Label(self._root, textvariable=ToStringVar(ids[i]), bg=bgs[i], width=widths[i])
             l.grid(row=self._row, column=i, sticky='nsew')
             self._ws.append(l)
 
         for i in range(1, 5):
-            root.grid_columnconfigure(i, weight=1)
+            self._root.grid_columnconfigure(i, weight=1)
 
 class GridRow:
-    def __init__(self, row, name, black, cyan, magenta, yellow):
+    def __init__(self, root, row, name, black, cyan, magenta, yellow):
+        self._root = root
         self._row = row
         self._name = name
         self._vals = []
@@ -51,41 +53,27 @@ class GridRow:
     def grid_set(self):
         bg_color = '#B0B0B0' if (self._row % 2) == 0 else 'white'
 
-        self._nw = tk.Label(root, textvariable=ToStringVar(self._name), bg=bg_color, width=_NAME_WIDTH)
+        self._nw = tk.Label(self._root, textvariable=ToStringVar(self._name), bg=bg_color, width=_NAME_WIDTH)
         self._nw.grid(row=self._row, column=0, sticky='nsew')
 
         self._vws = []
         for i in range(4):
-            l = tk.Label(root, textvariable=ToStringVar(self._vals[i]), bg=bg_color, width=_VAL_WIDTH)
+            l = tk.Label(self._root, textvariable=ToStringVar(self._vals[i]), bg=bg_color, width=_VAL_WIDTH)
             l.grid(row=self._row, column=i + 1, sticky='nsew')
             self._vws.append(l)
 
 class GridMsgRow:
-    def __init__(self, row, msg):
+    def __init__(self, root, row, msg):
+        self._root = root
         self._row = row
         self._msg = msg
 
         self.grid_set()
 
     def grid_set(self):
-        self._mw = tk.Label(root, textvariable=ToStringVar(self._msg), bg='green')
+        self._mw = tk.Label(self._root, textvariable=ToStringVar(self._msg), bg='green')
         self._mw.grid(row=self._row, column=0, columnspan=5, sticky='nsew')
 
     def grid_forget(self):
         self._mw.grid_forget()
-
-if __name__ == "__main__":
-    root = tk.Tk()
-    root.title('Test Grid')
-    root.minsize(width=375, height=500)
-    root.resizable(width=False, height=False)
-
-    g0 = GridRow(1, 'row 1', '44', 55, 66, 77)
-    g1 = GridRow(2, 'row 2', '44', 55, 66, 77)
-    g2 = GridMsgRow(3, 'this is a message\nmessgae\nmessage')
-    gh = GridHeaderRow()
-
-    #g0.grid_forget()
-    #g1.grid_forget()
-    root.mainloop()
 
