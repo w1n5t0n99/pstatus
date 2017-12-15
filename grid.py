@@ -57,8 +57,16 @@ class GridRow:
         self._nw.grid(row=self._row, column=0, sticky='nsew')
 
         self._vws = []
-        for i in range(4):
-            l = tk.Label(self._root, textvariable=ToStringVar(self._vals[i]), bg=bg_color, width=_VAL_WIDTH)
+        for i, val in enumerate(self._vals):
+            if isinstance(val, int):
+                fg_color='black' if abs(val) >= 10 else '#ff3232'
+            else:
+                fg_color = 'black'
+
+            if val == -3:
+                val = 'OK'
+
+            l = tk.Label(self._root, textvariable=ToStringVar(val), bg=bg_color, width=_VAL_WIDTH, fg=fg_color)
             l.grid(row=self._row, column=i + 1, sticky='nsew')
             self._vws.append(l)
 

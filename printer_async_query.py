@@ -59,7 +59,7 @@ oid_ss_name = '1.3.6.1.2.1.43.5.1.1.16.1'
 oid_ss_bw_mc = '1.3.6.1.2.1.43.11.1.1.8.1.1'
 oid_hp_bw_mc = '1.3.6.1.2.1.43.11.1.1.8.1.1'
 
-QueryResult = namedtuple('queryresult', ['name', 'type', 'status', 'black', 'cyan', 'magenta', 'yellow', 'model'])
+QueryResult = namedtuple('queryresult', ['name', 'type', 'status', 'black', 'cyan', 'magenta', 'yellow', 'model', 'row'])
 
 query_results = queue.Queue()
 
@@ -67,7 +67,7 @@ _query_results_lock = threading.Lock()
 _MAX_QUERY_THREADS = 40
 
 def _ErrorQueryResult(error):
-    return QueryResult(name='', type='', status=error, black=0, cyan=0, yellow=0, magenta=0, model=0)
+    return QueryResult(name='', type='', status=error, black=0, cyan=0, yellow=0, magenta=0, model=0, row=0)
 
 def _Clamp(n, minn, maxn):
     return max(min(maxn, n), minn)
@@ -96,7 +96,7 @@ def _QueryHpBw(printer):
     else:
         qr = QueryResult(name=printer[1], type=printer[2], status='ok',
                          black=_TonerPercentage(var_binds[1][1], var_binds[0][1]),
-                         cyan=0, magenta=0, yellow=0, model=var_binds[2][1])
+                         cyan=' ', magenta= ' ', yellow= ' ', model=var_binds[2][1], row=printer[3])
 
     return qr
 
@@ -120,7 +120,7 @@ def _QuerySsBw(printer):
     else:
         qr = QueryResult(name=printer[1], type=printer[2], status='ok',
                          black=_TonerPercentage(var_binds[1][1], var_binds[0][1]),
-                         cyan=0, magenta=0, yellow=0, model=var_binds[2][1])
+                         cyan= ' ', magenta= ' ', yellow=' ', model=var_binds[2][1], row=printer[3])
 
     return qr
 
@@ -153,7 +153,7 @@ def _QuerySsColor(printer):
                          cyan=_TonerPercentage(var_binds[3][1], var_binds[2][1]),
                          magenta=_TonerPercentage(var_binds[5][1], var_binds[4][1]),
                          yellow=_TonerPercentage(var_binds[7][1], var_binds[6][1]),
-                         model=var_binds[8][1])
+                         model=var_binds[8][1], row=printer[3])
 
 
     return qr
@@ -187,7 +187,7 @@ def _QueryHpColor(printer):
                          cyan=_TonerPercentage(var_binds[3][1], var_binds[2][1]),
                          magenta=_TonerPercentage(var_binds[5][1], var_binds[4][1]),
                          yellow=_TonerPercentage(var_binds[7][1], var_binds[6][1]),
-                         model=var_binds[8][1])
+                         model=var_binds[8][1], row=printer[3])
 
     return qr
 
@@ -210,7 +210,7 @@ def _QueryRicohBw(printer):
                                                  error_index and var_binds[-1][int(error_index) - 1] or '?'))
     else:
         qr = QueryResult(name=printer[1], type=printer[2], status='ok', black=var_binds[1][1],
-                         cyan=0, magenta=0, yellow=0, model=var_binds[2][1])
+                         cyan=' ', magenta=' ', yellow=' ', model=var_binds[2][1], row=printer[3])
 
     return qr
 
@@ -240,17 +240,18 @@ def _QueryRicohColor(printer):
                          cyan=_TonerPercentage(var_binds[2][1], var_binds[0][1]),
                          magenta=_TonerPercentage(var_binds[3][1], var_binds[0][1]),
                          yellow=_TonerPercentage(var_binds[4][1], var_binds[0][1]),
-                         model=var_binds[5][1])
+                         model=var_binds[5][1], row=printer[3])
 
     return qr
 
 class QueryThread (threading.Thread):
     ''' query a single printer '''
-    def __init__(self, id, printer_data):
+    def __init__(self, id, printer_data, query_callback_func):
         threading.Thread.__init__(self)
         self.id = id
         self.printer_data = printer_data
         self.threadID = 'thread {}'.format(id)
+        self._query_callback_func = query_callback_func
 
     def run(self):
         if self.printer_data[2] == 'hp_bw':
@@ -269,13 +270,16 @@ class QueryThread (threading.Thread):
             qr = _ErrorQueryResult('error - {} - not recognized type'.format(self.printer_data[2]))
 
         query_results.put(qr)
+        if self._query_callback_func is not None:
+            self._query_callback_func(self.printer_data[3], qr.name, qr.black, qr.cyan, qr.magenta, qr.yellow)
 
 class PStatusThread (threading.Thread):
-    def __init__(self, id, printers):
+    def __init__(self, id, printers, query_callback_func = None):
         threading.Thread.__init__(self)
         self.id = id
         self.printers = printers
         self.threadID = id
+        self._query_callback_func = query_callback_func
 
     def run(self):
         q_thread_id = 0
@@ -283,7 +287,7 @@ class PStatusThread (threading.Thread):
         thread_list = []
 
         for x in range(0, num_query_threads-1):
-            qt = QueryThread(q_thread_id, self.printers.get())
+            qt = QueryThread(q_thread_id, self.printers.get(), self._query_callback_func)
             qt.start()
             thread_list.append(qt)
 
@@ -292,7 +296,7 @@ class PStatusThread (threading.Thread):
 
         while not self.printers.empty():
             if threading.active_count() < (num_query_threads + 3):
-                qt = QueryThread(q_thread_id, self.printers.get())
+                qt = QueryThread(q_thread_id, self.printers.get(), self._query_callback_func)
                 qt.start()
                 thread_list.append(qt)
 
