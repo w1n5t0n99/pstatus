@@ -3,6 +3,7 @@ import threading
 
 import printer_db
 import printer_async_query
+import printer_query
 import grid
 
 
@@ -12,6 +13,7 @@ _header = None
 _rows = []
 _root = None
 _ref_button = None
+_pthread = threading.Thread(name='placeholder-thread')
 
 def InitPrinterGui(printers):
     _header = grid.GridHeaderRow(root)
@@ -26,14 +28,21 @@ def InitPrinterGui(printers):
         _rows.append(grid.GridRow(root, r, p[1], ' ', ' ', ' ', ' '))
         r +=1
 
-        _ref_button = tk.Button(root, text='Refresh', width=6, command=AsyncUpdateLabels)
-        _ref_button.grid(row=r, column=4)
+    _ref_button = tk.Button(root, text='Refresh', width=6, command=RunUpdateThread)
+    _ref_button.grid(row=r, column=4)
 
 def UpdatePrinterGui(row, name, black, cyan, magenta, yellow):
     _update_lock.acquire()
     _rows[row].grid_forget()
     #header is grid row 0
     _rows[row] = grid.GridRow(root, row+1, name, black, cyan, magenta, yellow)
+    _update_lock.release()
+
+def UpdatePrinterGuiMsg(row, msg):
+    _update_lock.acquire()
+    _rows[row].grid_forget()
+    #header is grid row 0
+    _rows[row] = grid.GridMsgRow(root, row+1, msg)
     _update_lock.release()
 
 
@@ -53,6 +62,19 @@ def AsyncUpdateLabels(printers):
                 _rows[p.row] = grid.GridRow(root, p.row + 1, p.name, p.black, p.cyan, p.magenta, p.yellow)   
     '''
 
+def UpdateLabels(printers):
+    for p in list(printers.queue):
+        qr = printer_query.QueryPrinter(p)
+        if qr.status == 'ok':
+            UpdatePrinterGui(qr.row, qr.name, qr.black, qr.cyan, qr.magenta, qr.yellow)
+        else:
+            UpdatePrinterGuiMsg(qr.row, qr.status)
+
+def RunUpdateThread():
+    global _pthread
+    if _pthread.is_alive() is not True:
+        _pthread = threading.Thread(name='update_thread', target=UpdateLabels, args=(printers,), daemon=True)
+        _pthread.start()
 
 if __name__ == "__main__":
     root = tk.Tk()
@@ -65,8 +87,14 @@ if __name__ == "__main__":
 
     InitPrinterGui(printers)
 
+    '''
     if printers != None:
         threading.Thread(name='update_thread', target=AsyncUpdateLabels, args=(printers,), daemon=True).start()
+    '''
+    if _pthread.is_alive() is not True:
+        print('got here')
+        _pthread = threading.Thread(name='update_thread', target=UpdateLabels, args=(printers,), daemon=True)
+        _pthread.start()
 
     root.mainloop()
 
