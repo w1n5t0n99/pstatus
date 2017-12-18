@@ -34,7 +34,11 @@ def InitPrinterGui(printers):
 
 def UpdatePrinterGui(row, name, black, cyan, magenta, yellow):
     _update_lock.acquire()
-    _rows[row].update(name, black, cyan, magenta, yellow)
+    if isinstance(_rows[row], grid.GridRow):
+        _rows[row].update(name, black, cyan, magenta, yellow)
+    else:
+        _rows[row].grid_forget()
+        _rows[row] = grid.GridRow(root, row, name, black, cyan, magenta, yellow)
     _update_lock.release()
 
 def UpdatePrinterGuiMsg(row, msg):
@@ -59,10 +63,19 @@ def UpdateLabels(printers):
         else:
             UpdatePrinterGuiMsg(qr.row + _row_offset, qr.status)
 
+def ClearLabels():
+    for row, i in enumerate(_rows[1:]):
+        _update_lock.acquire()
+        if isinstance(_rows[i], grid.GridRow):
+            _rows[row].clear()
+        else:
+            _rows[row].grid_forget()
+        _update_lock.release()
 
 def RunUpdateThread():
     global _pthread
     if _pthread.is_alive() is not True:
+        ClearLabels()
         _pthread = threading.Thread(name='update_thread', target=UpdateLabels, args=(printers,), daemon=True)
         _pthread.start()
 

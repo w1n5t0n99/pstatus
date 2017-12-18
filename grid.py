@@ -92,6 +92,8 @@ class GridRow:
 
             self._vws[i].config(textvariable=ToStringVar(val), fg=fg_color)
 
+    def clear(self):
+        self.update(self._name, " ", " ", " ", " ")
 
 class GridMsgRow:
     def __init__(self, root, row, msg):
@@ -107,4 +109,6 @@ class GridMsgRow:
 
     def grid_forget(self):
         self._mw.grid_forget()
+
+
 
