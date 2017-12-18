@@ -86,6 +86,9 @@ class GridRow:
 
             if val == -3:
                 val = 'OK'
+            elif val == -100:
+                val = 'Almost 0'
+                fg_color = '#ff3232'
 
             self._vws[i].config(textvariable=ToStringVar(val), fg=fg_color)
 

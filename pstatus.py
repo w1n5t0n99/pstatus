@@ -49,17 +49,7 @@ def AsyncUpdateLabels(printers):
     ps_thread = printer_async_query.PStatusThread('status-thread', printers, UpdatePrinterGui)
     ps_thread.start()
     ps_thread.join()
-    '''    
-    while ps_thread.is_alive():
-        p = printer_async_query.query_results.get()
-        if p is not None:
-            if p.status is not 'ok':
-                _rows[p.row].grid_forget()
-                _rows[p.row] = grid.GridMsgRow(root, p.row + 1, p.status)
-            else:
-                _rows[p.row].grid_forget()
-                _rows[p.row] = grid.GridRow(root, p.row + 1, p.name, p.black, p.cyan, p.magenta, p.yellow)   
-    '''
+
 
 def UpdateLabels(printers):
     for p in list(printers.queue):
@@ -69,11 +59,13 @@ def UpdateLabels(printers):
         else:
             UpdatePrinterGuiMsg(qr.row + _row_offset, qr.status)
 
+
 def RunUpdateThread():
     global _pthread
     if _pthread.is_alive() is not True:
         _pthread = threading.Thread(name='update_thread', target=UpdateLabels, args=(printers,), daemon=True)
         _pthread.start()
+
 
 if __name__ == "__main__":
     root = tk.Tk()
