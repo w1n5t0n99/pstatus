@@ -70,6 +70,26 @@ class GridRow:
             l.grid(row=self._row, column=i + 1, sticky='nsew')
             self._vws.append(l)
 
+    def update(self, name, black, cyan, magenta, yellow):
+        self._name = name
+        self._vals[0] = black
+        self._vals[1] = cyan
+        self._vals[2] = magenta
+        self._vals[3] = yellow
+
+        self._nw.config(textvariable=ToStringVar(self._name))
+        for i, val in enumerate(self._vals):
+            if isinstance(val, int):
+                fg_color = 'black' if abs(val) >= 10 else '#ff3232'
+            else:
+                fg_color = 'black'
+
+            if val == -3:
+                val = 'OK'
+
+            self._vws[i].config(textvariable=ToStringVar(val), fg=fg_color)
+
+
 class GridMsgRow:
     def __init__(self, root, row, msg):
         self._root = root
