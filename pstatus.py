@@ -6,6 +6,7 @@ import printer_db
 import printer_async_query
 import printer_query
 import grid
+import scroll_frame
 
 
 _update_lock = threading.Lock()
@@ -16,9 +17,10 @@ _row_offset = 1
 _root = None
 _ref_button = None
 _pthread = threading.Thread(name='placeholder-thread')
+_printers = []
 
 def InitPrinterGui(printers):
-    _header = grid.GridHeaderRow(root)
+    _header = grid.GridHeaderRow(scroll_win.scrollwindow)
     _rows.append(_header)
     r = len(_rows)
     global _row_offset
@@ -26,11 +28,12 @@ def InitPrinterGui(printers):
 
     for p in list(printers.queue):
 
-        _rows.append(grid.GridRow(root, r, p[1], ' ', ' ', ' ', ' '))
+        _rows.append(grid.GridRow(scroll_win.scrollwindow, r, p[1], ' ', ' ', ' ', ' '))
         r +=1
 
     _ref_button = tk.Button(root, text='Refresh', width=6, command=RunUpdateThread)
-    _ref_button.grid(row=r, column=4)
+    _ref_button.grid()
+
 
 def UpdatePrinterGui(row, name, black, cyan, magenta, yellow):
     _update_lock.acquire()
@@ -38,14 +41,14 @@ def UpdatePrinterGui(row, name, black, cyan, magenta, yellow):
         _rows[row].update(name, black, cyan, magenta, yellow)
     else:
         _rows[row].grid_forget()
-        _rows[row] = grid.GridRow(root, row, name, black, cyan, magenta, yellow)
+        _rows[row] = grid.GridRow(scroll_win.scrollwindow, row, name, black, cyan, magenta, yellow)
     _update_lock.release()
 
 def UpdatePrinterGuiMsg(row, msg):
     _update_lock.acquire()
     _rows[row].grid_forget()
     #header is grid row 0
-    _rows[row] = grid.GridMsgRow(root, row+1, msg)
+    _rows[row] = grid.GridMsgRow(scroll_win.scrollwindow, row+1, msg)
     _update_lock.release()
 
 
@@ -76,7 +79,7 @@ def RunUpdateThread():
     global _pthread
     if _pthread.is_alive() is not True:
         ClearLabels()
-        _pthread = threading.Thread(name='update_thread', target=UpdateLabels, args=(printers,), daemon=True)
+        _pthread = threading.Thread(name='update_thread', target=UpdateLabels, args=(_printers,), daemon=True)
         _pthread.start()
 
 
@@ -86,15 +89,20 @@ if __name__ == "__main__":
     root.minsize(width=375, height=500)
     root.resizable(width=False, height=False)
 
+    scroll_win = scroll_frame.ScrolledWindow(root, canv_h=500, canv_w=375)
+    scroll_win.grid()
+
+
+
     try:
-        printers = printer_db.LoadDB('printers.txt')
+        _printers = printer_db.LoadDB('printers.txt')
     except EnvironmentError:
-        printers = queue.Queue()
-        if printers.empty():
-            _rows.append(grid.GridMsgRow(root,
+        _printers = queue.Queue()
+        if _printers.empty():
+            _rows.append(grid.GridMsgRow(scroll_win.scrollwindow,
                                          1, 'Printers not found, make sure file named printers.txt\nin same directory as .exe'))
     finally:
-        InitPrinterGui(printers)
+        InitPrinterGui(_printers)
 
     '''
     if printers != None:
@@ -103,8 +111,9 @@ if __name__ == "__main__":
 
 
     if _pthread.is_alive() is not True:
-        _pthread = threading.Thread(name='update_thread', target=UpdateLabels, args=(printers,), daemon=True)
+        _pthread = threading.Thread(name='update_thread', target=UpdateLabels, args=(_printers,), daemon=True)
         _pthread.start()
+
 
     root.mainloop()
 
