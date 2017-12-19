@@ -86,8 +86,8 @@ def RunUpdateThread():
 if __name__ == "__main__":
     root = tk.Tk()
     root.title('Printer Status')
-    root.minsize(width=375, height=500)
-    root.resizable(width=False, height=False)
+  #  root.minsize(width=375, height=500)
+   # root.resizable(width=False, height=False)
 
     scroll_win = scroll_frame.ScrolledWindow(root, canv_h=500, canv_w=375)
     scroll_win.grid()

@@ -1,6 +1,8 @@
-import tkinter as ttk
+import tkinter as tk
+import tkinter.ttk as ttk
 
-class ScrolledWindow(ttk.Frame):
+
+class ScrolledWindow(tk.Frame):
     """
     1. Master widget gets scrollbars and a canvas. Scrollbars are connected
     to canvas scrollregion.
@@ -36,7 +38,7 @@ class ScrolledWindow(ttk.Frame):
         self.yscrlbr = ttk.Scrollbar(self.parent)
         self.yscrlbr.grid(column = 1, row = 0, sticky = 'ns')
         # creating a canvas
-        self.canv = ttk.Canvas(self.parent)
+        self.canv = tk.Canvas(self.parent)
         self.canv.config(relief = 'flat',
                          width = 10,
                          heigh = 10, bd = 2)
