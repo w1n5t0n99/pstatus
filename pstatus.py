@@ -8,6 +8,8 @@ import printer_query
 import grid
 import scroll_frame
 
+from pysnmp.hlapi import *
+
 
 _update_lock = threading.Lock()
 
@@ -92,6 +94,7 @@ if __name__ == "__main__":
     scroll_win = scroll_frame.ScrolledWindow(root, canv_h=500, canv_w=375)
     scroll_win.grid()
 
+    '''
 
 
     try:
@@ -105,16 +108,44 @@ if __name__ == "__main__":
         InitPrinterGui(_printers)
 
     '''
+    '''
     if printers != None:
         threading.Thread(name='update_thread', target=AsyncUpdateLabels, args=(printers,), daemon=True).start()
     '''
 
-
+    '''
     if _pthread.is_alive() is not True:
         _pthread = threading.Thread(name='update_thread', target=UpdateLabels, args=(_printers,), daemon=True)
         _pthread.start()
 
+    '''
+
+    _engine = SnmpEngine()
+    _com_data = CommunityData('public')
+    _context_data = ContextData()
+
+    error_indication, error_status, error_index, var_binds = next(
+        getCmd(_engine,
+               _com_data,
+               UdpTransportTarget(('172.16.3.12', 161)),
+               _context_data,
+               ObjectType(ObjectIdentity('1.3.6.1.2.1.43.8.2.1.9.1.1')),
+               ObjectType(ObjectIdentity('1.3.6.1.2.1.43.8.2.1.10.1.1'))
+               ))
+
+    if error_indication:
+        print(error_indication)
+    elif error_status:
+        print('{} at {}'.format(error_status.prettyPrint(), error_index and var_binds[-1][int(error_index) - 1] or '?'))
+    else:
+        print('max: {} level: {}'.format(var_binds[0][1], var_binds[1][1]))
 
     root.mainloop()
 
 
+#  1.3.6.1.2.1.43.6.1.1.3.1.1 = printer cover status
+#  1.3.6.1.2.1.43.16.5.1.2.1.1 = text currently shown on printers console display
+#  1.3.6.1.2.1.43.8.2.1.18.1.1 = description of tray e.g. tray 1
+#  1.3.6.1.2.1.43.8.2.1.18.1.2 = description of tray e.g. tray 2
+#  1.3.6.1.2.1.43.8.2.1.9.1.1 = max capacity of paper tray
+#  1.3.6.1.2.1.43.8.2.1.10.1.1 = current capacity of paper tray
