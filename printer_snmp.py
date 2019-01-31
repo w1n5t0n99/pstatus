@@ -7,7 +7,7 @@ class Printer:
         self.model = model
         self.ip = ip
 
-class Clp775Info:
+class Clp775Oids:
     oid_yellow = '.1.3.6.1.2.1.43.11.1.1.9.1.1'
     oid_magenta = '.1.3.6.1.2.1.43.11.1.1.9.1.2'
     oid_cyan = '.1.3.6.1.2.1.43.11.1.1.9.1.3'
@@ -40,6 +40,22 @@ class Clp775Info:
     oid_tr1_roller_capcity = '.1.3.6.1.2.1.43.11.1.1.8.1.8'
     oid_tr1_rroller_capacity = '.1.3.6.1.2.1.43.11.1.1.8.1.9'
     oid_dust_cleaning_kit_capacity = '.1.3.6.1.2.1.43.11.1.1.8.1.10'
+
+class Ml371Oids:
+    oid_black = '.1.3.6.1.2.1.43.11.1.1.9.1.1'
+    oid_fuser = '.1.3.6.1.2.1.43.11.1.1.9.1.2'
+    oid_tr1_roller = '.1.3.6.1.2.1.43.11.1.1.9.1.3'
+    oid_tr1_torque_limiter = '.1.3.6.1.2.1.43.11.1.1.9.1.4'
+
+    oid_black_capacity = '.1.3.6.1.2.1.43.11.1.1.8.1.1'
+    oid_fuser_capacity = '.1.3.6.1.2.1.43.11.1.1.8.1.2'
+    oid_tr1_roller_capacity = '.1.3.6.1.2.1.43.11.1.1.8.1.3'
+    oid_tr1_torque_limiter_capacity = '.1.3.6.1.2.1.43.11.1.1.8.1.4'
+
+    oid_black_str = '.1.3.6.1.2.1.43.11.1.1.6.1.1'
+    oid_fuser_str = '.1.3.6.1.2.1.43.11.1.1.6.1.2'
+    oid_tr1_roller_str = '.1.3.6.1.2.1.43.11.1.1.6.1.3'
+    oid_tr1_torque_limiter_Str = '.1.3.6.1.2.1.43.11.1.1.6.1.4'
 
     def __init__(self, yellow, magenta, cyan, black, tr_belt, fuser, mp_roller, tr1_roller, tr1_rroller, dust_clean_kit):
         self.yellow = yellow
