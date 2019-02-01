@@ -3,10 +3,9 @@ import threading
 import queue
 
 import printer_db
-import printer_async_query
-import printer_query
 import grid
 import scroll_frame
+import printer_snmp as ps
 
 from pysnmp.hlapi import *
 
@@ -33,7 +32,7 @@ def InitPrinterGui(printers):
         _rows.append(grid.GridRow(scroll_win.scrollwindow, r, p[1], ' ', ' ', ' ', ' '))
         r +=1
 
-    _ref_button = tk.Button(root, text='Refresh', width=6, command=RunUpdateThread)
+   # _ref_button = tk.Button(root, text='Refresh', width=6, command=RunUpdateThread)
     _ref_button.grid()
 
 
@@ -53,21 +52,6 @@ def UpdatePrinterGuiMsg(row, msg):
     _rows[row] = grid.GridMsgRow(scroll_win.scrollwindow, row+1, msg)
     _update_lock.release()
 
-
-def AsyncUpdateLabels(printers):
-    ps_thread = printer_async_query.PStatusThread('status-thread', printers, UpdatePrinterGui)
-    ps_thread.start()
-    ps_thread.join()
-
-
-def UpdateLabels(printers):
-    for p in list(printers.queue):
-        qr = printer_query.QueryPrinter(p)
-        if qr.status == 'ok':
-            UpdatePrinterGui(qr.row + _row_offset, qr.name, qr.black, qr.cyan, qr.magenta, qr.yellow)
-        else:
-            UpdatePrinterGuiMsg(qr.row + _row_offset, qr.status)
-
 def ClearLabels():
     for row, i in enumerate(_rows[1:]):
         _update_lock.acquire()
@@ -76,14 +60,6 @@ def ClearLabels():
         else:
             _rows[row].grid_forget()
         _update_lock.release()
-
-def RunUpdateThread():
-    global _pthread
-    if _pthread.is_alive() is not True:
-        ClearLabels()
-        _pthread = threading.Thread(name='update_thread', target=UpdateLabels, args=(_printers,), daemon=True)
-        _pthread.start()
-
 
 if __name__ == "__main__":
     root = tk.Tk()
@@ -108,44 +84,21 @@ if __name__ == "__main__":
         InitPrinterGui(_printers)
 
     '''
-    '''
-    if printers != None:
-        threading.Thread(name='update_thread', target=AsyncUpdateLabels, args=(printers,), daemon=True).start()
-    '''
+    core = ps.SnmpCore()
 
-    '''
-    if _pthread.is_alive() is not True:
-        _pthread = threading.Thread(name='update_thread', target=UpdateLabels, args=(_printers,), daemon=True)
-        _pthread.start()
+    lib_color_printer = ps.PrinterClp775('Library Color', '172.19.3.4')
+    lib_color_printer.query(core)
 
-    '''
+    lib_bw_printer = ps.PrinterMl371('Library B&W', '172.19.3.1')
+    lib_bw_printer.query(core)
 
-    _engine = SnmpEngine()
-    _com_data = CommunityData('public')
-    _context_data = ContextData()
+    vva_printer = ps.PrinterM3820dw('VVA', '172.19.3.14')
+    vva_printer.query(core)
 
-    error_indication, error_status, error_index, var_binds = next(
-        getCmd(_engine,
-               _com_data,
-               UdpTransportTarget(('172.16.3.12', 161)),
-               _context_data,
-               ObjectType(ObjectIdentity('1.3.6.1.2.1.43.8.2.1.9.1.1')),
-               ObjectType(ObjectIdentity('1.3.6.1.2.1.43.8.2.1.10.1.1'))
-               ))
-
-    if error_indication:
-        print(error_indication)
-    elif error_status:
-        print('{} at {}'.format(error_status.prettyPrint(), error_index and var_binds[-1][int(error_index) - 1] or '?'))
-    else:
-        print('max: {} level: {}'.format(var_binds[0][1], var_binds[1][1]))
+    print(lib_color_printer)
+    print(lib_bw_printer)
+    print(vva_printer)
 
     root.mainloop()
 
 
-#  1.3.6.1.2.1.43.6.1.1.3.1.1 = printer cover status
-#  1.3.6.1.2.1.43.16.5.1.2.1.1 = text currently shown on printers console display
-#  1.3.6.1.2.1.43.8.2.1.18.1.1 = description of tray e.g. tray 1
-#  1.3.6.1.2.1.43.8.2.1.18.1.2 = description of tray e.g. tray 2
-#  1.3.6.1.2.1.43.8.2.1.9.1.1 = max capacity of paper tray
-#  1.3.6.1.2.1.43.8.2.1.10.1.1 = current capacity of paper tray
