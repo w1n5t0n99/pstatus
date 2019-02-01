@@ -95,9 +95,18 @@ if __name__ == "__main__":
     vva_printer = ps.PrinterM3820dw('VVA', '172.19.3.14')
     vva_printer.query(core)
 
+    lib_copier = ps.PrinterAficioMp4001('Library Copier', '172.19.3.22')
+    lib_copier.query(core)
+
+    office_copier = ps.PrinterAficioMpC4501('Office Copier', '172.19.3.16')
+    office_copier.query(core)
+
     print(lib_color_printer)
     print(lib_bw_printer)
     print(vva_printer)
+    print(lib_copier)
+    print(office_copier)
+
 
     root.mainloop()
 
