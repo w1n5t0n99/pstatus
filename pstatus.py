@@ -6,6 +6,8 @@ import printer_db
 import grid
 import scroll_frame
 import printer_snmp as ps
+import printer_group as pg
+import itertools as it
 
 from pysnmp.hlapi import *
 
@@ -84,28 +86,24 @@ if __name__ == "__main__":
         InitPrinterGui(_printers)
 
     '''
-    core = ps.SnmpCore()
+    printer_group = pg.PrinterGroup()
 
-    lib_color_printer = ps.PrinterClp775('Library Color', '172.19.3.4')
-    lib_color_printer.query(core)
-
+    lib_color_printer = ps.PrinterSamsungColor('Library Color', '172.19.3.4')
     lib_bw_printer = ps.PrinterMl371('Library B&W', '172.19.3.1')
-    lib_bw_printer.query(core)
-
-    vva_printer = ps.PrinterM3820dw('VVA', '172.19.3.14')
-    vva_printer.query(core)
-
+    vva_printer = ps.PrinterSamsungBW('VVA', '172.19.3.14')
     lib_copier = ps.PrinterAficioMp4001('Library Copier', '172.19.3.22')
-    lib_copier.query(core)
-
     office_copier = ps.PrinterAficioMpC4501('Office Copier', '172.19.3.16')
-    office_copier.query(core)
 
-    print(lib_color_printer)
-    print(lib_bw_printer)
-    print(vva_printer)
-    print(lib_copier)
-    print(office_copier)
+    printer_group.append(lib_color_printer)
+    printer_group.append(lib_bw_printer)
+    printer_group.append(vva_printer)
+    printer_group.append(lib_copier)
+    printer_group.append(office_copier)
+
+    printer_group.query()
+
+    for p in printer_group:
+        print(p)
 
 
     root.mainloop()

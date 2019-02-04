@@ -17,6 +17,10 @@ class PrinterGroup:
         for p in self.printers:
             p.query(self.snmp_core)
 
+    def __iter__(self):
+        return iter(self.printers)
 
+    def __next__(self):
+        return next(self.printers)
 
 
