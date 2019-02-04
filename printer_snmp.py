@@ -223,7 +223,7 @@ class PrinterSamsungBW(IPrinter):
                                                               self.tr1_torque_limiter_level,
                                                               self.info)
 
-class PrinterAficioMp4001(IPrinter):
+class PrinterRicohBW(IPrinter):
     type_ = 'copier'
     model = 'mp4001'
     manufacturer = 'ricoh'
@@ -330,7 +330,7 @@ class PrinterAficioMp4001(IPrinter):
                                                          self.info,
                                                          )
 
-class PrinterAficioMpC4501(IPrinter):
+class PrinterRicohColor(IPrinter):
     type_ = 'copier'
     model = 'mpc4501'
     manufacturer = 'ricoh'

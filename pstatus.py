@@ -89,10 +89,10 @@ if __name__ == "__main__":
     printer_group = pg.PrinterGroup()
 
     lib_color_printer = ps.PrinterSamsungColor('Library Color', '172.19.3.4')
-    lib_bw_printer = ps.PrinterMl371('Library B&W', '172.19.3.1')
+    lib_bw_printer = ps.PrinterSamsungBW('Library B&W', '172.19.3.1')
     vva_printer = ps.PrinterSamsungBW('VVA', '172.19.3.14')
-    lib_copier = ps.PrinterAficioMp4001('Library Copier', '172.19.3.22')
-    office_copier = ps.PrinterAficioMpC4501('Office Copier', '172.19.3.16')
+    lib_copier = ps.PrinterRicohBW('Library Copier', '172.16.3.8')
+    office_copier = ps.PrinterRicohColor('Office Copier', '172.25.10.5')
 
     printer_group.append(lib_color_printer)
     printer_group.append(lib_bw_printer)
