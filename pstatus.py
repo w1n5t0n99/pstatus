@@ -1,14 +1,14 @@
 import tkinter as tk
 import threading
 import queue
+import struct
 
 import printer_db
 import grid
 import scroll_frame
 import printer_snmp as ps
 import printer_group as pg
-import itertools as it
-
+import printer as pr
 from pysnmp.hlapi import *
 
 
@@ -86,6 +86,7 @@ if __name__ == "__main__":
         InitPrinterGui(_printers)
 
     '''
+    '''
     printer_group = pg.PrinterGroup()
 
     lib_color_printer = ps.PrinterSamsungColor('Library Color', '172.19.3.4')
@@ -105,6 +106,15 @@ if __name__ == "__main__":
     for p in printer_group:
         print(p)
 
+    '''
+    core = ps.SnmpCore()
+
+    p0 = pr.PrinterBW('RHS VVA BW', '172.19.3.14')
+    p0.query(core)
+
+    print("name: {} error: {}".format(p0.name, p0.error_state))
+    if p0.cyan:
+        print("cyan: {}".format(p0.cyan))
 
     root.mainloop()
 
