@@ -1,36 +1,36 @@
-172.16.3.4' 'RCE LIB BW' ss_bw
-172.16.3.5 'RCE LIB Color' ss_color
-172.16.3.1 'RCE Office BW' hp_bw
-172.16.3.6 'RCE 206 BW' ss_bw
-172.16.3.18 'RCE Principal BW' ss_bw
-172.16.3.9 'RCE AP BW' ss_bw
-172.16.3.17 'RCE AP2 BW' ss_bw
+172.16.3.4 'RCE LIB BW' bw
+172.16.3.5 'RCE LIB Color' color
+172.16.3.1 'RCE Office BW' bw
+172.16.3.6 'RCE 206 BW' bw
+172.16.3.18 'RCE Principal BW' bw
+172.16.3.9 'RCE AP BW' bw
+172.16.3.17 'RCE AP2 BW' bw
 172.16.3.8 'RCE Work Room Copier' savin_bw
-172.16.3.10 'RCE SPED BW' ss_bw
-172.16.3.16 'RCI LMC BW' ss_bw
-172.16.3.14 'RCI Typing Color' ss_color
-172.16.3.12 'RCI Work Room Color' ss_color
-172.16.3.13 'RCI SPED BW' ss_bw
+172.16.3.10 'RCE SPED BW' bw
+172.16.3.16 'RCI LMC BW' bw
+172.16.3.14 'RCI Typing Color' color
+172.16.3.12 'RCI Work Room Color' color
+172.16.3.13 'RCI SPED BW' bw
 172.16.3.19 'RCI Work Room Copier' savin_bw
 172.19.3.22 'Rhs Lib Copier' ricoh_bw
-172.19.3.1 'RHS Lib BW' ss_bw
-172.19.3.4 'RHS Lib Color' ss_color
+172.19.3.1 'RHS Lib BW' bw
+172.19.3.4 'RHS Lib Color' color
 172.19.3.5 'RHS Office BW' hp_bw
-172.19.3.2 'RHS Typing BW' ss_bw
-172.19.3.3 'RHS Typing Color' ss_color
-172.19.3.11 'RHS OT BW' ss_bw
-172.19.3.18 'RHS OT Color' ss_color
-172.19.3.7 'RHS Check' ss_bw
-172.19.3.12 'RHS 112 BW' ss_bw
+172.19.3.2 'RHS Typing BW' bw
+172.19.3.3 'RHS Typing Color' color
+172.19.3.11 'RHS OT BW' bw
+172.19.3.18 'RHS OT Color' color
+172.19.3.7 'RHS Check' bw
+172.19.3.12 'RHS 112 BW' bw
 172.19.3.16 'RHS Office Copier' ricoh_color
 172.19.3.23 'RHS WR Copier' savin_bw
-172.19.3.8 'RHS Sped BW' ss_bw
-172.19.3.13 'RHS Sped 120' ss_bw
-172.19.3.14 'RHS VVA BW' ss_bw
-172.19.3.6 'RHS Lab BW' ss_bw
+172.19.3.8 'RHS Sped BW' bw
+172.19.3.13 'RHS Sped 120' bw
+172.19.3.14 'RHS VVA BW' bw
+172.19.3.6 'RHS Lab BW' bw
 172.19.3.20 'RHS New Wing Copier' savin_bw
 172.25.10.14 'SBO Tech' hp_bw
-172.25.10.12 'SBO Susan Office' ss_color
+172.25.10.12 'SBO Susan Office' color
 172.25.10.5 'SBO Copier color' ricoh_color
 172.25.10.7 'SBO Color 4700' hp_color
 172.25.10.3 'SBO BW 4240' hp_bw

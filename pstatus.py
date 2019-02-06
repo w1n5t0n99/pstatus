@@ -1,26 +1,43 @@
 import tkinter as tk
-import threading
-import queue
-import struct
-
-import printer_db
 import grid
 import scroll_frame
-import printer_snmp as ps
-import printer_group as pg
+
+import threading
+
+import printer_db as db
 import printer as pr
-from pysnmp.hlapi import *
-
-
-_update_lock = threading.Lock()
 
 _header = None
 _rows = []
 _row_offset = 1
 _root = None
 _ref_button = None
-_pthread = threading.Thread(name='placeholder-thread')
+
 _printers = []
+
+def create_printers(printers_text):
+    printers = []
+    for p in printers_text:
+        if p[2] == 'bw':
+            printers.append(pr.PrinterBW(p[1], p[0]))
+        elif p[2] == 'color':
+            printers.append(pr.PrinterColor(p[1], p[0]))
+
+    return printers
+
+def query_printer(printer):
+    try:
+        printer.query()
+
+        if printer.cyan is None:
+            print('{} b: {}'.format(printer.name, printer.black))
+        else:
+            print('{} b: {} c: {} m: {} y : {}'.format(printer.name, printer.black, printer.cyan,
+                                                       printer.magenta, printer.yellow))
+
+    except:
+        print('ERROR: {}'.format(printer.name))
+
 
 def InitPrinterGui(printers):
     _header = grid.GridHeaderRow(scroll_win.scrollwindow)
@@ -39,29 +56,23 @@ def InitPrinterGui(printers):
 
 
 def UpdatePrinterGui(row, name, black, cyan, magenta, yellow):
-    _update_lock.acquire()
     if isinstance(_rows[row], grid.GridRow):
         _rows[row].update(name, black, cyan, magenta, yellow)
     else:
         _rows[row].grid_forget()
         _rows[row] = grid.GridRow(scroll_win.scrollwindow, row, name, black, cyan, magenta, yellow)
-    _update_lock.release()
 
 def UpdatePrinterGuiMsg(row, msg):
-    _update_lock.acquire()
     _rows[row].grid_forget()
     #header is grid row 0
     _rows[row] = grid.GridMsgRow(scroll_win.scrollwindow, row+1, msg)
-    _update_lock.release()
 
 def ClearLabels():
     for row, i in enumerate(_rows[1:]):
-        _update_lock.acquire()
         if isinstance(_rows[i], grid.GridRow):
             _rows[row].clear()
         else:
             _rows[row].grid_forget()
-        _update_lock.release()
 
 if __name__ == "__main__":
     root = tk.Tk()
@@ -86,35 +97,18 @@ if __name__ == "__main__":
         InitPrinterGui(_printers)
 
     '''
-    '''
-    printer_group = pg.PrinterGroup()
 
-    lib_color_printer = ps.PrinterSamsungColor('Library Color', '172.19.3.4')
-    lib_bw_printer = ps.PrinterSamsungBW('Library B&W', '172.19.3.1')
-    vva_printer = ps.PrinterSamsungBW('VVA', '172.19.3.14')
-    lib_copier = ps.PrinterRicohBW('Library Copier', '172.16.3.8')
-    office_copier = ps.PrinterRicohColor('Office Copier', '172.25.10.5')
+    pr_text = db.LoadDB('printers.txt')
+    printers = create_printers(pr_text)
+    printer_threads = []
 
-    printer_group.append(lib_color_printer)
-    printer_group.append(lib_bw_printer)
-    printer_group.append(vva_printer)
-    printer_group.append(lib_copier)
-    printer_group.append(office_copier)
+    for p in printers:
+        printer_threads.append(threading.Thread(target=query_printer, args=(p, )))
 
-    printer_group.query()
+    for p in printer_threads:
+        p.start()
+        #p.join()
 
-    for p in printer_group:
-        print(p)
-
-    '''
-    core = ps.SnmpCore()
-
-    p0 = pr.PrinterBW('RHS VVA BW', '172.19.3.14')
-    p0.query(core)
-
-    print("name: {} error: {}".format(p0.name, p0.error_state))
-    if p0.cyan:
-        print("cyan: {}".format(p0.cyan))
 
     root.mainloop()
 
