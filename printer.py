@@ -59,37 +59,39 @@ class IPrinter(metaclass=ABCMeta):
 
     def _get_error_str(self, err):
         err_str = ''
-        if (err[0] & 0x0) == 1:
-            err_str += ', low paper'
-        if (err[0] & 0x2) == 1:
-            err_str += ', no paper'
-        if (err[0] & 0x4) == 1:
-            err_str += ', low toner'
-        if (err[0] & 0x8) == 1:
-            err_str += ', no toner'
-        if (err[0] & 0x10) == 1:
-            err_str += ', door open'
-        if (err[0] & 0x20) == 1:
-            err_str += ', jammed'
-        if (err[0] & 0x40) == 1:
-            err_str += ', offline'
-        if (err[0] & 0x80) == 1:
+        if err[1] & 0b00000001:
             err_str += ', service requested'
+        if err[1] & 0b00000010:
+            err_str += ', offline'
+        if err[1] & 0b00000100:
+            err_str += ', jammed'
+        if err[1] & 0b00001000:
+            err_str += ', door open'
+        if err[1] & 0b00010000:
+            err_str += ', no toner'
+        if err[1] & 0b00100000:
+            err_str += ', low toner'
+        if err[1] & 0b01000000:
+            err_str += ', no paper'
+        if err[1] & 0b10000000:
+            err_str += ', low paper'
 
-        if (err[1] & 0) == 1:
-            err_str += ', input tray missing'
-        if (err[1] & 0x2) == 1:
-            err_str += ', output tray missing'
-        if (err[1] & 0x4) == 1:
-            err_str += ', marker supply missing'
-        if (err[1] & 0x8) == 1:
-            err_str += ', output near full'
-        if (err[1] & 0x10) == 1:
-            err_str += ', output full'
-        if (err[1] & 0x20) == 1:
-            err_str += ', input tray empty'
-        if (err[1] & 0x40) == 1:
+        if err[0] & 0b00000001:
+            err_str += ', input tray missing unused bit'
+        if err[0] & 0b00000010:
             err_str += ', overdue prevent maintenance'
+        if err[0] & 0b00000100:
+            err_str += ', input tray empty'
+        if err[0] & 0b00001000:
+            err_str += ', output full'
+        if err[0] & 0b00010000:
+            err_str += ', output near full'
+        if err[0] & 0b00100000:
+            err_str += ', marker supply missing'
+        if err[0] & 0b01000000:
+            err_str += ', output tray missing'
+        if err[0] & 0b10000000:
+            err_str += ', input tray missing'
 
         if err[0] == 0 and err[1] == 0:
             err_str = 'no error'

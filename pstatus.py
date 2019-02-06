@@ -1,19 +1,8 @@
 import tkinter as tk
-import grid
-import scroll_frame
-
 import threading
 
 import printer_db as db
 import printer as pr
-
-_header = None
-_rows = []
-_row_offset = 1
-_root = None
-_ref_button = None
-
-_printers = []
 
 def create_printers(printers_text):
     printers = []
@@ -39,64 +28,7 @@ def query_printer(printer):
         print('ERROR: {}'.format(printer.name))
 
 
-def InitPrinterGui(printers):
-    _header = grid.GridHeaderRow(scroll_win.scrollwindow)
-    _rows.append(_header)
-    r = len(_rows)
-    global _row_offset
-    _row_offset = r
-
-    for p in list(printers.queue):
-
-        _rows.append(grid.GridRow(scroll_win.scrollwindow, r, p[1], ' ', ' ', ' ', ' '))
-        r +=1
-
-   # _ref_button = tk.Button(root, text='Refresh', width=6, command=RunUpdateThread)
-    _ref_button.grid()
-
-
-def UpdatePrinterGui(row, name, black, cyan, magenta, yellow):
-    if isinstance(_rows[row], grid.GridRow):
-        _rows[row].update(name, black, cyan, magenta, yellow)
-    else:
-        _rows[row].grid_forget()
-        _rows[row] = grid.GridRow(scroll_win.scrollwindow, row, name, black, cyan, magenta, yellow)
-
-def UpdatePrinterGuiMsg(row, msg):
-    _rows[row].grid_forget()
-    #header is grid row 0
-    _rows[row] = grid.GridMsgRow(scroll_win.scrollwindow, row+1, msg)
-
-def ClearLabels():
-    for row, i in enumerate(_rows[1:]):
-        if isinstance(_rows[i], grid.GridRow):
-            _rows[row].clear()
-        else:
-            _rows[row].grid_forget()
-
 if __name__ == "__main__":
-    root = tk.Tk()
-    root.title('Printer Status')
-  #  root.minsize(width=375, height=500)
-   # root.resizable(width=False, height=False)
-
-    scroll_win = scroll_frame.ScrolledWindow(root, canv_h=500, canv_w=375)
-    scroll_win.grid()
-
-    '''
-
-
-    try:
-        _printers = printer_db.LoadDB('printers.txt')
-    except EnvironmentError:
-        _printers = queue.Queue()
-        if _printers.empty():
-            _rows.append(grid.GridMsgRow(scroll_win.scrollwindow,
-                                         1, 'Printers not found, make sure file named printers.txt\nin same directory as .exe'))
-    finally:
-        InitPrinterGui(_printers)
-
-    '''
 
     pr_text = db.LoadDB('printers.txt')
     printers = create_printers(pr_text)
@@ -109,7 +41,65 @@ if __name__ == "__main__":
         p.start()
         #p.join()
 
+    root = tk.Tk()
+    root.grid_rowconfigure(0, weight=1)
+    root.columnconfigure(0, weight=1)
 
+    frame_main = tk.Frame(root, bg="gray")
+    frame_main.grid(sticky='news')
+
+    label1 = tk.Label(frame_main, text="Label 1", fg="green")
+    label1.grid(row=0, column=0, pady=(5, 0), sticky='nw')
+
+    label2 = tk.Label(frame_main, text="Label 2", fg="blue")
+    label2.grid(row=1, column=0, pady=(5, 0), sticky='nw')
+
+    label3 = tk.Label(frame_main, text="Label 3", fg="red")
+    label3.grid(row=3, column=0, pady=5, sticky='nw')
+
+    # Create a frame for the canvas with non-zero row&column weights
+    frame_canvas = tk.Frame(frame_main)
+    frame_canvas.grid(row=2, column=0, pady=(5, 0), sticky='nw')
+    frame_canvas.grid_rowconfigure(0, weight=1)
+    frame_canvas.grid_columnconfigure(0, weight=1)
+    # Set grid_propagate to False to allow 5-by-5 buttons resizing later
+    frame_canvas.grid_propagate(False)
+
+    # Add a canvas in that frame
+    canvas = tk.Canvas(frame_canvas, bg="yellow")
+    canvas.grid(row=0, column=0, sticky="news")
+
+    # Link a scrollbar to the canvas
+    vsb = tk.Scrollbar(frame_canvas, orient="vertical", command=canvas.yview)
+    vsb.grid(row=0, column=1, sticky='ns')
+    canvas.configure(yscrollcommand=vsb.set)
+
+    # Create a frame to contain the buttons
+    frame_buttons = tk.Frame(canvas, bg="blue")
+    canvas.create_window((0, 0), window=frame_buttons, anchor='nw')
+
+    # Add 9-by-5 buttons to the frame
+    rows = 9
+    columns = 5
+    buttons = [[tk.Button() for j in range(columns)] for i in range(rows)]
+    for i in range(0, rows):
+        for j in range(0, columns):
+            buttons[i][j] = tk.Button(frame_buttons, text=("%d,%d" % (i + 1, j + 1)))
+            buttons[i][j].grid(row=i, column=j, sticky='news')
+
+    # Update buttons frames idle tasks to let tkinter calculate buttons sizes
+    frame_buttons.update_idletasks()
+
+    # Resize the canvas frame to show exactly 5-by-5 buttons and the scrollbar
+    first5columns_width = sum([buttons[0][j].winfo_width() for j in range(0, 5)])
+    first5rows_height = sum([buttons[i][0].winfo_height() for i in range(0, 5)])
+    frame_canvas.config(width=first5columns_width + vsb.winfo_width(),
+                        height=first5rows_height)
+
+    # Set the canvas scrolling region
+    canvas.config(scrollregion=canvas.bbox("all"))
+
+    # Launch the GUI
     root.mainloop()
 
 
@@ -132,5 +122,14 @@ if __name__ == "__main__":
      outputFull           12
      inputTrayEmpty       13
      overduePreventMaint  14
+     
     If both bytes are zero, no error condition detected
+    
+    Bits are numbered starting with the most significant
+      bit of the first byte being bit 0, the least
+      significant bit of the first byte being bit 7, the
+      most significant bit of the second byte being bit 8,
+      and so on.  A one bit encodes that the condition was
+      detected, while a zero bit encodes that the condition
+      was not detected.
     '''
