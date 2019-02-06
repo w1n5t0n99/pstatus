@@ -30,10 +30,10 @@ def query_printer(printer):
         printer.query()
 
         if printer.cyan is None:
-            print('{} b: {}'.format(printer.name, printer.black))
+            print('{} b: {} err: {}'.format(printer.name, printer.black, printer.error_state))
         else:
-            print('{} b: {} c: {} m: {} y : {}'.format(printer.name, printer.black, printer.cyan,
-                                                       printer.magenta, printer.yellow))
+            print('{} b: {} c: {} m: {} y : {} err: {}'.format(printer.name, printer.black, printer.cyan,
+                                                       printer.magenta, printer.yellow, printer.error_state))
 
     except:
         print('ERROR: {}'.format(printer.name))
@@ -113,3 +113,24 @@ if __name__ == "__main__":
     root.mainloop()
 
 
+    '''
+    1.3.6.1.2.1.43.9.2.1.1 (prtOutputIndex): output capacity (0 or more; 0 means out of paper)
+    1.3.6.1.2.1.25.3.5.1.2 (hrPrinterDetectedErrorState): octet string of
+    length 2 (2 bytes); if bits below are set, corresponding error condition is in effect:
+     lowPaper              0
+     noPaper               1
+     lowToner              2
+     noToner               3
+     doorOpen              4
+     jammed                5
+     offline               6
+     serviceRequested      7
+     inputTrayMissing      8
+     outputTrayMissing     9
+     markerSupplyMissing  10
+     outputNearFull       11
+     outputFull           12
+     inputTrayEmpty       13
+     overduePreventMaint  14
+    If both bytes are zero, no error condition detected
+    '''

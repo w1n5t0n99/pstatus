@@ -57,6 +57,45 @@ class IPrinter(metaclass=ABCMeta):
         level = int(toner_level / max_capacity * 100)
         return self._clamp(level, 0, 100)
 
+    def _get_error_str(self, err):
+        err_str = ''
+        if (err[0] & 0x0) == 1:
+            err_str += ', low paper'
+        if (err[0] & 0x2) == 1:
+            err_str += ', no paper'
+        if (err[0] & 0x4) == 1:
+            err_str += ', low toner'
+        if (err[0] & 0x8) == 1:
+            err_str += ', no toner'
+        if (err[0] & 0x10) == 1:
+            err_str += ', door open'
+        if (err[0] & 0x20) == 1:
+            err_str += ', jammed'
+        if (err[0] & 0x40) == 1:
+            err_str += ', offline'
+        if (err[0] & 0x80) == 1:
+            err_str += ', service requested'
+
+        if (err[1] & 0) == 1:
+            err_str += ', input tray missing'
+        if (err[1] & 0x2) == 1:
+            err_str += ', output tray missing'
+        if (err[1] & 0x4) == 1:
+            err_str += ', marker supply missing'
+        if (err[1] & 0x8) == 1:
+            err_str += ', output near full'
+        if (err[1] & 0x10) == 1:
+            err_str += ', output full'
+        if (err[1] & 0x20) == 1:
+            err_str += ', input tray empty'
+        if (err[1] & 0x40) == 1:
+            err_str += ', overdue prevent maintenance'
+
+        if err[0] == 0 and err[1] == 0:
+            err_str = 'no error'
+
+        return err_str
+
 
 class PrinterBW(IPrinter):
     '''black and white printer object'''
@@ -107,9 +146,9 @@ class PrinterBW(IPrinter):
 
         self.black = self._percentage(vals[0][1], vals_max[0][1])
         self.fuser = self._percentage(vals[1][1], vals_max[1][1])
-#        self.tr1_roller = self._percentage(vals[2][1], vals_max[2][1])
-#        self.tr1_torque_limiter = self._percentage(vals[3][1], vals_max[3][1])
-        self.error_state = (vals_max[4][1]).asNumbers()
+        self.tr1_roller = self._percentage(vals[2][1], vals_max[2][1])
+        self.tr1_torque_limiter = self._percentage(vals[3][1], vals_max[3][1])
+        self.error_state = self._get_error_str((vals_max[4][1]).asNumbers())
         self.info = vals_max[5][1]
 
 class PrinterColor(IPrinter):
@@ -194,7 +233,7 @@ class PrinterColor(IPrinter):
         self.tr1_roller = self._percentage(vals[7][1], vals_max[7][1])
         self.tr1_rroller = self._percentage(vals[8][1], vals_max[8][1])
         self.dust_ck = self._percentage(vals[9][1], vals_max[9][1])
-        self.error_state = (vals_max[10][1]).asNumbers()
+        self.error_state = self._get_error_str((vals_max[10][1]).asNumbers())
         self.info = vals_max[11][1]
 
 

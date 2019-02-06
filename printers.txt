@@ -1,6 +1,6 @@
 172.16.3.4 'RCE LIB BW' bw
 172.16.3.5 'RCE LIB Color' color
-172.16.3.1 'RCE Office BW' bw
+172.16.3.1 'RCE Office BW' hp_bw
 172.16.3.6 'RCE 206 BW' bw
 172.16.3.18 'RCE Principal BW' bw
 172.16.3.9 'RCE AP BW' bw
