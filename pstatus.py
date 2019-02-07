@@ -1,9 +1,15 @@
 import tkinter as tk
+import tkinter.messagebox
 import threading
+import functools
 
 import printer_db as db
 import printer as pr
 import copier as cp
+
+printers = []
+printer_button_col = []
+printer_label_col = []
 
 def create_printers(printers_text):
     printers = []
@@ -15,31 +21,96 @@ def create_printers(printers_text):
 
     return printers
 
+
 def query_printer(printer):
     try:
         printer.query()
-
-        if printer.cyan is None:
-            print('{} b: {} err: {}'.format(printer.name, printer.black,
-                                            printer.error_state if printer.error_state else "no error"))
-        else:
-            print('{} b: {} c: {} m: {} y : {} err: {}'.format(printer.name, printer.black, printer.cyan,
-                                                       printer.magenta, printer.yellow,
-                                                       printer.error_state if printer.error_state else "no error"))
-
     except:
-        print('ERROR: {}'.format(printer.name))
+        printer.clear()
 
-def create_printer_rows(printers, rows_frame):
+
+def create_printer_name_column(printers, frame):
     prows = [tk.Button() for p in printers]
 
     i = 0
     for p in printers:
-        prows[i] = tk.Button(rows_frame, text=("{}".format(p.name)))
+        prows[i] = tk.Button(frame, text=("{}".format(p.name)), command= functools.partial(printer_detail_mb, i))
         prows[i].grid(row=i, column=0, sticky='news')
         i+=1
 
     return prows
+
+
+def create_printer_info_column(printers, frame):
+    prows = [tk.Label() for p in printers]
+
+    i = 0
+    for p in printers:
+        if p.black is None:
+            prows[i] = tk.Label(frame, text="ERROR")
+        elif p.cyan is not None:
+            prows[i] = tk.Label(frame, text="b: {} c: {} m: {} y : {}".format(p.black, p.cyan, p.magenta, p.yellow))
+        else:
+            prows[i] = tk.Label(frame, text="b: {}".format(p.black))
+
+        prows[i].grid(row=i, column=1, sticky='news')
+        i += 1
+
+    return prows
+
+
+def resize_printer_frame(frame, name_column, info_column, num_to_show):
+
+    if len(name_column) != len(info_column):
+        raise ValueError
+
+    if len(name_column) <= num_to_show:
+        n = len(name_column)
+    else:
+        n = num_to_show
+
+    first_n_columns_width = name_column[0].winfo_width() + info_column[0].winfo_width()
+    first_n_rows_height = 0
+
+    for i in range(0, n):
+        #first_n_columns_width += name_column[i].winfo_width()
+        first_n_rows_height += name_column[i].winfo_height()
+
+    frame.config(width=first_n_columns_width + vsb.winfo_width(), height=first_n_rows_height)
+
+
+def refresh_printer_row(row):
+    p = printers[row]
+    if p.cyan is not None:
+        printer_label_col[row].config( text="b: {} c: {} m: {} y : {}".format(p.black, p.cyan, p.magenta, p.yellow))
+    else:
+        printer_label_col[row].config(text="b: {}".format(p.black))
+
+
+def printer_detail_mb(row):
+    print(row)
+    p = printers[row]
+
+    if p.black is None:
+        msg = "ERROR"
+    elif p.cyan is None:
+        msg = "black: {}\nfuser: {}\ntray 1 roller: {}\ntray 1 torque limiter: {}\nerror state: {}".format(p.black,
+                                                                                                           p.fuser,
+                                                                                                           p.tr1_roller,
+                                                                                                           p.tr1_torque_limiter,
+                                                                                                           p.error_state)
+    else:
+        msg = "black: {} cyan: {} magenta: {} yellow: {}\nfuser: {}\ntray 1 roller: {}\ntransfer belt: {}\nerror state: {}".format(p.black,
+                                                                                                                                   p.cyan,
+                                                                                                                                   p.magenta,
+                                                                                                                                   p.yellow,
+                                                                                                                                   p.fuser,
+                                                                                                                                   p.tr1_roller,
+                                                                                                                                   p.tr_belt,
+                                                                                                                                   p.error_state)
+
+    tk.messagebox.showinfo(title="{}".format(p.name), message=msg)
+
 
 
 if __name__ == "__main__":
@@ -49,37 +120,29 @@ if __name__ == "__main__":
     printer_threads = []
 
     for p in printers:
-        printer_threads.append(threading.Thread(target=query_printer, args=(p, )))
+        printer_threads.append(threading.Thread(target=query_printer, args=(p,)))
 
     for p in printer_threads:
         p.start()
-        #p.join()
+        p.join()
 
-    c = cp.CopierColor('Office Copier', '172.19.3.16')
-    c.query()
-
-    print('name: {} b: {} c: {} m: {} y: {}\nhistory: {}'.format(c.name, c.black, c.cyan, c.magenta, c.yellow, c.history))
-
-    '''
     root = tk.Tk()
+    root.title = 'printer status'
     root.grid_rowconfigure(0, weight=1)
     root.columnconfigure(0, weight=1)
 
     frame_main = tk.Frame(root, bg="gray")
     frame_main.grid(sticky='news')
 
-    label1 = tk.Label(frame_main, text="Label 1", fg="green")
+    label1 = tk.Label(frame_main, text="Printers", bg="gray")
     label1.grid(row=0, column=0, pady=(5, 0), sticky='nw')
 
-    label2 = tk.Label(frame_main, text="Label 2", fg="blue")
-    label2.grid(row=1, column=0, pady=(5, 0), sticky='nw')
-
-    label3 = tk.Label(frame_main, text="Label 3", fg="red")
-    label3.grid(row=3, column=0, pady=5, sticky='nw')
+    ref_button = tk.Button(frame_main, text="Refresh")
+    ref_button.grid(row=2, column=0, pady=(5, 0), sticky='nw')
 
     # Create a frame for the canvas with non-zero row&column weights
     frame_canvas = tk.Frame(frame_main)
-    frame_canvas.grid(row=2, column=0, pady=(5, 0), sticky='nw')
+    frame_canvas.grid(row=1, column=0, pady=(5, 0), sticky='nw')
     frame_canvas.grid_rowconfigure(0, weight=1)
     frame_canvas.grid_columnconfigure(0, weight=1)
     # Set grid_propagate to False to allow 5-by-5 buttons resizing later
@@ -98,108 +161,17 @@ if __name__ == "__main__":
     frame_buttons = tk.Frame(canvas, bg="blue")
     canvas.create_window((0, 0), window=frame_buttons, anchor='nw')
 
-    # Add 9-by-5 buttons to the frame
-    rows = 9
-    columns = 5
-    buttons = [[tk.Button() for j in range(columns)] for i in range(rows)]
-    for i in range(0, rows):
-        for j in range(0, columns):
-            buttons[i][j] = tk.Button(frame_buttons, text=("%d,%d" % (i + 1, j + 1)))
-            buttons[i][j].grid(row=i, column=j, sticky='news')
+    printer_button_col = create_printer_name_column(printers, frame_buttons)
+    printer_label_col = create_printer_info_column(printers, frame_buttons)
 
     # Update buttons frames idle tasks to let tkinter calculate buttons sizes
     frame_buttons.update_idletasks()
 
-    # Resize the canvas frame to show exactly 5-by-5 buttons and the scrollbar
-    first5columns_width = sum([buttons[0][j].winfo_width() for j in range(0, 5)])
-    first5rows_height = sum([buttons[i][0].winfo_height() for i in range(0, 5)])
-    frame_canvas.config(width=first5columns_width + vsb.winfo_width(),
-                        height=first5rows_height)
-
+    # Resize the canvas frame to show exactly 5 buttons and the scrollbar
+    resize_printer_frame(frame_canvas, printer_button_col, printer_label_col, 8)
     # Set the canvas scrolling region
     canvas.config(scrollregion=canvas.bbox("all"))
 
     # Launch the GUI
     root.mainloop()
 
-    '''
-
-    printer_grid_rows = []
-
-    root = tk.Tk()
-    root.grid_rowconfigure(0, weight=1)
-    root.columnconfigure(0, weight=1)
-
-    frame_main = tk.Frame(root, bg="gray")
-    frame_main.grid(sticky='news')
-
-    label1 = tk.Label(frame_main, text="Printers", fg="green")
-    label1.grid(row=0, column=0, pady=(5, 0), sticky='nw')
-
-    # Create a frame for the canvas with non-zero row&column weights
-    frame_canvas = tk.Frame(frame_main)
-    frame_canvas.grid(row=2, column=0, pady=(5, 0), sticky='nw')
-    frame_canvas.grid_rowconfigure(0, weight=1)
-    frame_canvas.grid_columnconfigure(0, weight=1)
-    # Set grid_propagate to False to allow 5-by-5 buttons resizing later
-    frame_canvas.grid_propagate(False)
-
-    # Add a canvas in that frame
-    canvas = tk.Canvas(frame_canvas, bg="yellow")
-    canvas.grid(row=0, column=0, sticky="news")
-
-    # Link a scrollbar to the canvas
-    vsb = tk.Scrollbar(frame_canvas, orient="vertical", command=canvas.yview)
-    vsb.grid(row=0, column=1, sticky='ns')
-    canvas.configure(yscrollcommand=vsb.set)
-
-    # Create a frame to contain the buttons
-    frame_buttons = tk.Frame(canvas, bg="blue")
-    canvas.create_window((0, 0), window=frame_buttons, anchor='nw')
-
-    printer_grid_rows = create_printer_rows(printers, frame_buttons)
-
-    # Update buttons frames idle tasks to let tkinter calculate buttons sizes
-    frame_buttons.update_idletasks()
-
-    # Resize the canvas frame to show exactly 5-by-5 buttons and the scrollbar
-    first5columns_width = sum([printer_grid_rows[j].winfo_width() for j in range(0, 5)])
-    first5rows_height = sum([printer_grid_rows[i].winfo_height() for i in range(0, 5)])
-    frame_canvas.config(width=first5columns_width + vsb.winfo_width(), height=first5rows_height)
-
-    # Set the canvas scrolling region
-    canvas.config(scrollregion=canvas.bbox("all"))
-
-    # Launch the GUI
-    root.mainloop()
-
-    '''
-    1.3.6.1.2.1.43.9.2.1.1 (prtOutputIndex): output capacity (0 or more; 0 means out of paper)
-    1.3.6.1.2.1.25.3.5.1.2 (hrPrinterDetectedErrorState): octet string of
-    length 2 (2 bytes); if bits below are set, corresponding error condition is in effect:
-     lowPaper              0
-     noPaper               1
-     lowToner              2
-     noToner               3
-     doorOpen              4
-     jammed                5
-     offline               6
-     serviceRequested      7
-     inputTrayMissing      8
-     outputTrayMissing     9
-     markerSupplyMissing  10
-     outputNearFull       11
-     outputFull           12
-     inputTrayEmpty       13
-     overduePreventMaint  14
-     
-    If both bytes are zero, no error condition detected
-    
-    Bits are numbered starting with the most significant
-      bit of the first byte being bit 0, the least
-      significant bit of the first byte being bit 7, the
-      most significant bit of the second byte being bit 8,
-      and so on.  A one bit encodes that the condition was
-      detected, while a zero bit encodes that the condition
-      was not detected.
-    '''

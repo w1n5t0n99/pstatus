@@ -239,6 +239,36 @@ class PrinterColor(IPrinter):
         self.info = vals_max[11][1]
 
 
+'''
+   1.3.6.1.2.1.43.9.2.1.1 (prtOutputIndex): output capacity (0 or more; 0 means out of paper)
+   1.3.6.1.2.1.25.3.5.1.2 (hrPrinterDetectedErrorState): octet string of
+   length 2 (2 bytes); if bits below are set, corresponding error condition is in effect:
+    lowPaper              0
+    noPaper               1
+    lowToner              2
+    noToner               3
+    doorOpen              4
+    jammed                5
+    offline               6
+    serviceRequested      7
+    inputTrayMissing      8
+    outputTrayMissing     9
+    markerSupplyMissing  10
+    outputNearFull       11
+    outputFull           12
+    inputTrayEmpty       13
+    overduePreventMaint  14
+
+   If both bytes are zero, no error condition detected
+
+   Bits are numbered starting with the most significant
+     bit of the first byte being bit 0, the least
+     significant bit of the first byte being bit 7, the
+     most significant bit of the second byte being bit 8,
+     and so on.  A one bit encodes that the condition was
+     detected, while a zero bit encodes that the condition
+     was not detected.
+   '''
 
 
 
