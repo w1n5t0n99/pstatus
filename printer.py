@@ -77,7 +77,7 @@ class IPrinter(metaclass=ABCMeta):
             err_str += ', low paper'
 
         if err[0] & 0b00000001:
-            err_str += ', input tray missing unused bit'
+            err_str += ', unused bit'
         if err[0] & 0b00000010:
             err_str += ', overdue prevent maintenance'
         if err[0] & 0b00000100:
@@ -94,7 +94,7 @@ class IPrinter(metaclass=ABCMeta):
             err_str += ', input tray missing'
 
         if err[0] == 0 and err[1] == 0:
-            err_str = 'no error'
+            err_str = None
 
         return err_str
 

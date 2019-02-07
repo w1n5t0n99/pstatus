@@ -3,6 +3,7 @@ import threading
 
 import printer_db as db
 import printer as pr
+import copier as cp
 
 def create_printers(printers_text):
     printers = []
@@ -19,13 +20,26 @@ def query_printer(printer):
         printer.query()
 
         if printer.cyan is None:
-            print('{} b: {} err: {}'.format(printer.name, printer.black, printer.error_state))
+            print('{} b: {} err: {}'.format(printer.name, printer.black,
+                                            printer.error_state if printer.error_state else "no error"))
         else:
             print('{} b: {} c: {} m: {} y : {} err: {}'.format(printer.name, printer.black, printer.cyan,
-                                                       printer.magenta, printer.yellow, printer.error_state))
+                                                       printer.magenta, printer.yellow,
+                                                       printer.error_state if printer.error_state else "no error"))
 
     except:
         print('ERROR: {}'.format(printer.name))
+
+def create_printer_rows(printers, rows_frame):
+    prows = [tk.Button() for p in printers]
+
+    i = 0
+    for p in printers:
+        prows[i] = tk.Button(rows_frame, text=("{}".format(p.name)))
+        prows[i].grid(row=i, column=0, sticky='news')
+        i+=1
+
+    return prows
 
 
 if __name__ == "__main__":
@@ -41,6 +55,12 @@ if __name__ == "__main__":
         p.start()
         #p.join()
 
+    c = cp.CopierColor('Office Copier', '172.19.3.16')
+    c.query()
+
+    print('name: {} b: {} c: {} m: {} y: {}\nhistory: {}'.format(c.name, c.black, c.cyan, c.magenta, c.yellow, c.history))
+
+    '''
     root = tk.Tk()
     root.grid_rowconfigure(0, weight=1)
     root.columnconfigure(0, weight=1)
@@ -102,6 +122,56 @@ if __name__ == "__main__":
     # Launch the GUI
     root.mainloop()
 
+    '''
+
+    printer_grid_rows = []
+
+    root = tk.Tk()
+    root.grid_rowconfigure(0, weight=1)
+    root.columnconfigure(0, weight=1)
+
+    frame_main = tk.Frame(root, bg="gray")
+    frame_main.grid(sticky='news')
+
+    label1 = tk.Label(frame_main, text="Printers", fg="green")
+    label1.grid(row=0, column=0, pady=(5, 0), sticky='nw')
+
+    # Create a frame for the canvas with non-zero row&column weights
+    frame_canvas = tk.Frame(frame_main)
+    frame_canvas.grid(row=2, column=0, pady=(5, 0), sticky='nw')
+    frame_canvas.grid_rowconfigure(0, weight=1)
+    frame_canvas.grid_columnconfigure(0, weight=1)
+    # Set grid_propagate to False to allow 5-by-5 buttons resizing later
+    frame_canvas.grid_propagate(False)
+
+    # Add a canvas in that frame
+    canvas = tk.Canvas(frame_canvas, bg="yellow")
+    canvas.grid(row=0, column=0, sticky="news")
+
+    # Link a scrollbar to the canvas
+    vsb = tk.Scrollbar(frame_canvas, orient="vertical", command=canvas.yview)
+    vsb.grid(row=0, column=1, sticky='ns')
+    canvas.configure(yscrollcommand=vsb.set)
+
+    # Create a frame to contain the buttons
+    frame_buttons = tk.Frame(canvas, bg="blue")
+    canvas.create_window((0, 0), window=frame_buttons, anchor='nw')
+
+    printer_grid_rows = create_printer_rows(printers, frame_buttons)
+
+    # Update buttons frames idle tasks to let tkinter calculate buttons sizes
+    frame_buttons.update_idletasks()
+
+    # Resize the canvas frame to show exactly 5-by-5 buttons and the scrollbar
+    first5columns_width = sum([printer_grid_rows[j].winfo_width() for j in range(0, 5)])
+    first5rows_height = sum([printer_grid_rows[i].winfo_height() for i in range(0, 5)])
+    frame_canvas.config(width=first5columns_width + vsb.winfo_width(), height=first5rows_height)
+
+    # Set the canvas scrolling region
+    canvas.config(scrollregion=canvas.bbox("all"))
+
+    # Launch the GUI
+    root.mainloop()
 
     '''
     1.3.6.1.2.1.43.9.2.1.1 (prtOutputIndex): output capacity (0 or more; 0 means out of paper)
