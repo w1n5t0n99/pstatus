@@ -153,11 +153,15 @@ if __name__ == "__main__":
     main_frame.grid_rowconfigure(0, weight=0)
     main_frame.grid_rowconfigure(1, weight=1)
     main_frame.grid_columnconfigure(0, weight = 1)
+    main_frame.grid_rowconfigure(2, weight=0)
+
 
     # main frame children ===============================================
     label = Label(main_frame, text="Printers", bg='gray')
     label.grid(row=0, column=0, pady=(5, 0), padx=(5,5), sticky=E + N + W + S)
 
+    ref_button = Button(main_frame, text="Refresh", bg='light gray')
+    ref_button.grid(row=2, column=0, pady=(5, 0), padx=(5, 0), sticky=W)
 
     frame_canvas = Frame(main_frame, bg="green")
     frame_canvas.grid(row=1, column=0, pady=(5, 0), sticky=E + N + W + S)
@@ -165,7 +169,7 @@ if __name__ == "__main__":
     frame_canvas.grid_columnconfigure(0, weight=1)
 
     # frame canvas children =====================================
-    canvas = Canvas(frame_canvas, bg="yellow")
+    canvas = Canvas(frame_canvas)
     canvas.grid(row=0, column=0, sticky=E + N + W + S)
     canvas.grid_rowconfigure(0, weight=1)
     canvas.grid_columnconfigure(0, weight=1)
