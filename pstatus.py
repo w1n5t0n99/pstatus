@@ -1,4 +1,4 @@
-import tkinter as tk
+from tkinter import *
 import tkinter.messagebox
 import threading
 import functools
@@ -30,11 +30,11 @@ def query_printer(printer):
 
 
 def create_printer_name_column(printers, frame):
-    prows = [tk.Button() for p in printers]
+    prows = [Button() for p in printers]
 
     i = 0
     for p in printers:
-        prows[i] = tk.Button(frame, text=("{}".format(p.name)), command= functools.partial(printer_detail_mb, i))
+        prows[i] = Button(frame, text=("{}".format(p.name)), command= functools.partial(printer_detail_mb, i))
         prows[i].grid(row=i, column=0, sticky='news')
         i+=1
 
@@ -42,16 +42,16 @@ def create_printer_name_column(printers, frame):
 
 
 def create_printer_info_column(printers, frame):
-    prows = [tk.Label() for p in printers]
+    prows = [Label() for p in printers]
 
     i = 0
     for p in printers:
         if p.black is None:
-            prows[i] = tk.Label(frame, text="ERROR")
+            prows[i] = Label(frame, text="ERROR")
         elif p.cyan is not None:
-            prows[i] = tk.Label(frame, text="b: {} c: {} m: {} y : {}".format(p.black, p.cyan, p.magenta, p.yellow))
+            prows[i] = Label(frame, text="b: {} c: {} m: {} y : {}".format(p.black, p.cyan, p.magenta, p.yellow))
         else:
-            prows[i] = tk.Label(frame, text="b: {}".format(p.black))
+            prows[i] = Label(frame, text="b: {}".format(p.black))
 
         prows[i].grid(row=i, column=1, sticky='news')
         i += 1
@@ -59,6 +59,7 @@ def create_printer_info_column(printers, frame):
     return prows
 
 
+'''
 def resize_printer_frame(frame, name_column, info_column, num_to_show):
 
     if len(name_column) != len(info_column):
@@ -76,7 +77,7 @@ def resize_printer_frame(frame, name_column, info_column, num_to_show):
         first_n_rows_height += name_column[i].winfo_height()
 
     frame.config(width=first_n_columns_width + vsb.winfo_width(), height=first_n_rows_height)
-
+'''
 
 def refresh_printer_row(row):
     p = printers[row]
@@ -107,11 +108,7 @@ def printer_detail_mb(row):
                                                                                                                                    p.tr_belt,
                                                                                                                                    p.error_state)
 
-    tk.messagebox.showinfo(title="{}".format(p.name), message=msg)
-
-
-def _on_mousewheel(event):
-    canvas.yview_scroll(-1*(event.delta/120), "units")
+    tkinter.messagebox.showinfo(title="{}".format(p.name), message=msg)
 
 
 if __name__ == "__main__":
@@ -125,8 +122,9 @@ if __name__ == "__main__":
 
     for p in printer_threads:
         p.start()
-        p.join()
+       # p.join()
 
+    '''
     root = tk.Tk()
     root.title('printer status')
     root.grid_rowconfigure(0, weight=1)
@@ -153,7 +151,7 @@ if __name__ == "__main__":
     canvas.grid(row=0, column=0, sticky="news")
     canvas.grid_rowconfigure(0, weight=1)
     canvas.grid_columnconfigure(0, weight=1)
-    canvas.bind_all("<MouseWheel>", _on_mousewheel)
+ #   canvas.bind_all("<MouseWheel>", _on_mousewheel)
 
     # Link a scrollbar to the canvas
     vsb = tk.Scrollbar(frame_canvas, orient="vertical", command=canvas.yview)
@@ -179,4 +177,46 @@ if __name__ == "__main__":
 
     # Launch the GUI
     root.mainloop()
+    
+    '''
 
+    root = Tk()
+    root.grid_columnconfigure(0, weight=1)
+    root.grid_rowconfigure(0, weight=1)
+    # Create & Configure frame
+    main_frame = Frame(root)
+    main_frame.grid(row=0, column=0, sticky=N + S + E + W)
+    main_frame.grid_rowconfigure(0, weight=1)
+    main_frame.grid_rowconfigure(1, weight=4)
+    main_frame.grid_columnconfigure(0, weight = 1)
+
+    label = Label(main_frame, text="Label", bg='gray')
+    label.grid(row=0, column=0, pady=(5, 0), sticky=E + N + W + S)
+
+
+    frame_canvas = Frame(main_frame, bg="green")
+    frame_canvas.grid(row=1, column=0, pady=(5, 0), sticky=E + N + W + S)
+    frame_canvas.grid_rowconfigure(0, weight=1)
+    frame_canvas.grid_columnconfigure(0, weight=1)
+
+    canvas = Canvas(frame_canvas, bg="yellow")
+    canvas.grid(row=0, column=0, sticky=E + N + W + S)
+    canvas.grid_rowconfigure(0, weight=1)
+    canvas.grid_columnconfigure(0, weight=1)
+    canvas.config(scrollregion=(0, 0, 1000, 1000))
+
+    vsb = Scrollbar(frame_canvas, orient="vertical", command=canvas.yview)
+    vsb.grid(row=0, column=1, sticky=N + S)
+
+    '''
+    # Create a 5x10 (rows x columns) grid of buttons inside the frame
+    for row_index in range(5):
+        Grid.rowconfigure(main_frame, row_index, weight=1)
+        for col_index in range(10):
+            Grid.columnconfigure(main_frame, col_index, weight=1)
+            btn = Button(main_frame)  # create a button inside frame
+            btn.grid(row=row_index, column=col_index, sticky=N + S + E + W)
+            
+    '''
+
+    root.mainloop()
