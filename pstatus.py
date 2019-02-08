@@ -35,7 +35,8 @@ def create_printer_name_column(printers, frame):
     i = 0
     for p in printers:
         prows[i] = Button(frame, text=("{}".format(p.name)), command= functools.partial(printer_detail_mb, i))
-        prows[i].grid(row=i, column=0, sticky='news')
+        prows[i].grid(row=i, column=0, sticky=N + S + E + W)
+        frame.grid_rowconfigure(i, weight=1)
         i+=1
 
     return prows
@@ -53,7 +54,7 @@ def create_printer_info_column(printers, frame):
         else:
             prows[i] = Label(frame, text="b: {}".format(p.black))
 
-        prows[i].grid(row=i, column=1, sticky='news')
+        prows[i].grid(row=i, column=1, sticky=N + S + E + W)
         i += 1
 
     return prows
@@ -111,6 +112,15 @@ def printer_detail_mb(row):
     tkinter.messagebox.showinfo(title="{}".format(p.name), message=msg)
 
 
+def frame_width(event):
+    canvas_width = event.width
+    canvas.itemconfigure(canvas_window, width=canvas_width)
+
+
+def on_frame_configure(event):
+    canvas.config(scrollregion=canvas.bbox("all"))
+
+
 if __name__ == "__main__":
 
     pr_text = db.LoadDB('printers.txt')
@@ -122,7 +132,7 @@ if __name__ == "__main__":
 
     for p in printer_threads:
         p.start()
-       # p.join()
+        p.join()
 
     '''
     root = tk.Tk()
@@ -190,8 +200,9 @@ if __name__ == "__main__":
     main_frame.grid_rowconfigure(1, weight=4)
     main_frame.grid_columnconfigure(0, weight = 1)
 
+    # main frame children ===============================================
     label = Label(main_frame, text="Label", bg='gray')
-    label.grid(row=0, column=0, pady=(5, 0), sticky=E + N + W + S)
+    label.grid(row=0, column=0, pady=(5, 0), padx=(5,5), sticky=E + N + W + S)
 
 
     frame_canvas = Frame(main_frame, bg="green")
@@ -199,14 +210,35 @@ if __name__ == "__main__":
     frame_canvas.grid_rowconfigure(0, weight=1)
     frame_canvas.grid_columnconfigure(0, weight=1)
 
+    # frame canvas children =====================================
     canvas = Canvas(frame_canvas, bg="yellow")
     canvas.grid(row=0, column=0, sticky=E + N + W + S)
     canvas.grid_rowconfigure(0, weight=1)
     canvas.grid_columnconfigure(0, weight=1)
-    canvas.config(scrollregion=(0, 0, 1000, 1000))
+    canvas.config(scrollregion=(0, 0, 0, 800))
 
     vsb = Scrollbar(frame_canvas, orient="vertical", command=canvas.yview)
     vsb.grid(row=0, column=1, sticky=N + S)
+
+    # canvas children ==============================================
+
+    printers_frame = Frame(canvas, bg="blue")
+    printers_frame.columnconfigure(0, weight=1)
+    printers_frame.columnconfigure(1, weight=1)
+
+    canvas_window = canvas.create_window((0, 0), window=printers_frame, anchor=N + W)
+
+    canvas.bind('<Configure>', frame_width)
+    printers_frame.bind('<Configure>', on_frame_configure)
+
+    printer_button_col = create_printer_name_column(printers, printers_frame)
+    printer_label_col = create_printer_info_column(printers, printers_frame)
+
+
+
+    printers_frame.update_idletasks()
+
+
 
     '''
     # Create a 5x10 (rows x columns) grid of buttons inside the frame
