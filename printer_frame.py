@@ -29,7 +29,6 @@ class PrinterFrame:
         """
         return "#%02x%02x%02x" % rgb
 
-
     def _set_scroll_region(self):
         scroll_height = 0
         for p in self._printer_rows:
@@ -37,11 +36,9 @@ class PrinterFrame:
 
         self._printer_canvas.config(scrollregion=(0, 0, 0, scroll_height))
 
-
     def _set_frame_width(self, event):
         canvas_width = event.width
         self._printer_canvas.itemconfigure(self._printer_canvas_window, width=canvas_width)
-
 
     def _create_printer_rows(self):
         f = self._printer_list_frame
@@ -70,7 +67,6 @@ class PrinterFrame:
             self._printer_rows[i][1].grid(row=i, column=1, padx=(0, 15), sticky=N + S + E + W)
 
             i += 1
-
 
     def _printer_detail_mb(self, row):
         p = self._printers[row]
@@ -111,7 +107,6 @@ class PrinterFrame:
 
         self._printer_canvas.config(width=first_n_columns_width + self.vsb.winfo_width(), height=first_n_rows_height)
 
-
     def set_printers(self, printers):
         self._printers = printers
         self._printer_list_frame = Frame(self._printer_canvas)
@@ -128,6 +123,13 @@ class PrinterFrame:
         self._printer_canvas.update_idletasks()
         self._set_scroll_region()
         self._printer_canvas.config(yscrollcommand=self.vsb.set)
+
+    def clear_printers_info(self):
+        for p in self._printers:
+            p.clear()
+
+        for p in self._printer_rows:
+            p[1].config(text=" ")
 
     def update_printers(self):
 

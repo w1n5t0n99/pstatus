@@ -1,7 +1,6 @@
 from tkinter import *
-import tkinter.messagebox
 import threading
-import functools
+import printer_thread
 
 import printer_db as db
 import printer as pr
@@ -9,8 +8,9 @@ import copier as cp
 import printer_frame as pf
 
 printers = []
-printer_button_col = []
-printer_label_col = []
+printer_threads = []
+printer_frame = None
+
 
 def create_printers(printers_text):
     printers = []
@@ -23,37 +23,34 @@ def create_printers(printers_text):
     return printers
 
 
-def query_printer(printer):
-    try:
-        printer.query()
-    except:
-        printer.clear()
+def printer_threads_active():
+    active = False
+    for p in printer_threads:
+        if p.is_alive():
+            active = True
+
+    return active
 
 
-def update_if_thread_finished(printer_threads, printer_frame):
-    alive = True
-    while alive == True:
-        i = 0
-        for p in printer_threads:
-            cur_alive = False
-            if p.is_alive():
-                cur_alive = True
-            else:
-                printer_frame.update_row(i)
+def refresh_printers():
+    if printer_threads_active():
+        return
 
-            i+=1
-        alive = cur_alive
+    printer_threads.clear()
+    printer_frame.clear_printers_info()
+    i = 0
+    for p in printers:
+        printer_threads.append(printer_thread.PrinterThread(p, i, printer_frame))
+        i += 1
 
+    for p in printer_threads:
+        p.start()
 
 
 if __name__ == "__main__":
 
     pr_text = db.LoadDB('printers.txt')
     printers = create_printers(pr_text)
-    printer_threads = []
-
-    for p in printers:
-        printer_threads.append(threading.Thread(target=query_printer, args=(p,)))
 
     root = Tk()
     root.title("RCPS Printers")
@@ -75,13 +72,16 @@ if __name__ == "__main__":
     printer_frame = pf.PrinterFrame(main_frame, 1, 0)
     printer_frame.set_printers(printers)
 
-    ref_button = Button(main_frame, text="Refresh", bg='light gray', command=printer_frame.update_printers)
+    ref_button = Button(main_frame, text="Refresh", bg='light gray', command=refresh_printers)
     ref_button.grid(row=2, column=0, pady=(5, 0), padx=(5, 0), sticky=W)
+
+    i = 0
+    for p in printers:
+        printer_threads.append(printer_thread.PrinterThread(p, i, printer_frame))
+        i+=1
 
     for p in printer_threads:
         p.start()
 
-    printer_frame.update_printers()
-
-    root.after(8000, printer_frame.update_printers)
+    #root.after(8000, printer_frame.update_printers)
     root.mainloop()
