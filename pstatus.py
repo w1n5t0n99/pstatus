@@ -56,7 +56,7 @@ if __name__ == "__main__":
         printer_threads.append(threading.Thread(target=query_printer, args=(p,)))
 
     root = Tk()
-    root.title("printer status")
+    root.title("RCPS Printers")
     root.grid_columnconfigure(0, weight=1)
     root.grid_rowconfigure(0, weight=1)
     # Create & Configure frame
@@ -80,8 +80,6 @@ if __name__ == "__main__":
 
     for p in printer_threads:
         p.start()
-  #  for p in printer_threads:
-  #     p.join()
 
     printer_frame.update_printers()
 

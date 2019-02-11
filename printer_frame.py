@@ -23,6 +23,12 @@ class PrinterFrame:
         self.vsb = Scrollbar(self._printer_frame, orient="vertical", command=self._printer_canvas.yview)
         self.vsb.grid(row=0, column=1, sticky=N + S)
 
+    @staticmethod
+    def _from_rgb(rgb):
+        """translates an rgb tuple of int to a tkinter friendly color code
+        """
+        return "#%02x%02x%02x" % rgb
+
 
     def _set_scroll_region(self):
         scroll_height = 0
@@ -43,18 +49,25 @@ class PrinterFrame:
 
         i = 0
         for p in self._printers:
+
+            if i % 2 == 0:
+                bg_color = self._from_rgb((180, 180, 180))
+            else:
+                bg_color = self._from_rgb((200, 200, 200))
+
+
             self._printer_rows[i][0].config(text=("{}".format(p.name)), command=functools.partial(self._printer_detail_mb, i))
             self._printer_rows[i][0].grid(row=i, column=0, padx=(15, 0), sticky=N + S + E + W)
             f.grid_rowconfigure(i, weight=1)
 
             if p.black is None:
-                self._printer_rows[i][1].config(text="ERROR")
+                self._printer_rows[i][1].config(text=" ", bg=bg_color)
             elif p.cyan is not None:
-                self._printer_rows[i][1].config(text="B: {} C: {} M: {} Y: {}".format(p.black, p.cyan, p.magenta, p.yellow))
+                self._printer_rows[i][1].config(text="B: {} C: {} M: {} Y: {}".format(p.black, p.cyan, p.magenta, p.yellow),  bg=bg_color,)
             else:
-                self._printer_rows[i][1].config(text="B: {}".format(p.black))
+                self._printer_rows[i][1].config(text="B: {}".format(p.black),  bg=bg_color,)
 
-            self._printer_rows[i][1].grid(row=i, column=1, sticky=N + S + E + W)
+            self._printer_rows[i][1].grid(row=i, column=1, padx=(0, 15), sticky=N + S + E + W)
 
             i += 1
 
