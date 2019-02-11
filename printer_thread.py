@@ -18,6 +18,7 @@ class PrinterThread(threading.Thread):
             self._printer.query()
         except:
             self._printer.clear()
+           # print("error {} - {}".format(self._printer.name, self._printer.ip))
 
         self._printer_frame.update_row(self._row)
 

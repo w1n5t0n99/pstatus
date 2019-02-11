@@ -30,6 +30,7 @@
 172.19.3.6 'RHS Lab BW' bw
 172.19.3.20 'RHS New Wing Copier' savin_bw
 172.25.10.14 'SBO Tech' hp_bw
+172.25.10.13 'SBO Tech Color' color
 172.25.10.12 'SBO Susan Office' color
 172.25.10.5 'SBO Copier color' ricoh_color
 172.25.10.7 'SBO Color 4700' hp_color

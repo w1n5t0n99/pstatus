@@ -167,7 +167,7 @@ class PrinterColor(IPrinter):
     _oid_tr1_rroller = '.1.3.6.1.2.1.43.11.1.1.9.1.9'
     _oid_dust_cleaning_kit = '.1.3.6.1.2.1.43.11.1.1.9.1.10'
 
-    _oid_yellow_capacity = '.1.3.6.1.2.1.43.11.1.1.8.1.1 '
+    _oid_yellow_capacity = '.1.3.6.1.2.1.43.11.1.1.8.1.1'
     _oid_magenta_capacity = '.1.3.6.1.2.1.43.11.1.1.8.1.2'
     _oid_cyan_capacity = '.1.3.6.1.2.1.43.11.1.1.8.1.3'
     _oid_black_capacity = '.1.3.6.1.2.1.43.11.1.1.8.1.4'
@@ -237,6 +237,70 @@ class PrinterColor(IPrinter):
         self.dust_ck = self._percentage(vals[9][1], vals_max[9][1])
         self.error_state = self._get_error_str((vals_max[10][1]).asNumbers())
         self.info = vals_max[11][1]
+
+
+class PrinterHpColor(IPrinter):
+    '''color printer object'''
+
+    _oid_yellow = '.1.3.6.1.2.1.43.11.1.1.9.1.1'
+    _oid_magenta = '.1.3.6.1.2.1.43.11.1.1.9.1.2'
+    _oid_cyan = '.1.3.6.1.2.1.43.11.1.1.9.1.3'
+    _oid_black = '.1.3.6.1.2.1.43.11.1.1.9.1.4'
+    _oid_tr_belt = '.1.3.6.1.2.1.43.11.1.1.9.1.5'
+    _oid_fuser = '.1.3.6.1.2.1.43.11.1.1.9.1.6'
+
+    _oid_yellow_capacity = '.1.3.6.1.2.1.43.11.1.1.8.1.1'
+    _oid_magenta_capacity = '.1.3.6.1.2.1.43.11.1.1.8.1.2'
+    _oid_cyan_capacity = '.1.3.6.1.2.1.43.11.1.1.8.1.3'
+    _oid_black_capacity = '.1.3.6.1.2.1.43.11.1.1.8.1.4'
+    _oid_tr_belt_capacity = '.1.3.6.1.2.1.43.11.1.1.8.1.5'
+    _oid_fuser_capacity = '.1.3.6.1.2.1.43.11.1.1.8.1.6'
+
+    def __init__(self, name, ip):
+        super(PrinterHpColor, self).__init__(name, ip)
+
+    def query(self):
+        error_indication, error_status, error_index, vals = next(
+            getCmd(self.core.engine,
+                   self.core.com_data,
+                   UdpTransportTarget((self.ip, 161)),
+                   self.core.context_data,
+                   ObjectType(ObjectIdentity(self._oid_yellow)),
+                   ObjectType(ObjectIdentity(self._oid_magenta)),
+                   ObjectType(ObjectIdentity(self._oid_cyan)),
+                   ObjectType(ObjectIdentity(self._oid_black)),
+                   ObjectType(ObjectIdentity(self._oid_tr_belt)),
+                   ObjectType(ObjectIdentity(self._oid_fuser)),
+                   )
+        )
+
+        error_indication, error_status, error_index, vals_max = next(
+            getCmd(self.core.engine,
+                   self.core.com_data,
+                   UdpTransportTarget((self.ip, 161)),
+                   self.core.context_data,
+                   ObjectType(ObjectIdentity(self._oid_yellow_capacity)),
+                   ObjectType(ObjectIdentity(self._oid_magenta_capacity)),
+                   ObjectType(ObjectIdentity(self._oid_cyan_capacity)),
+                   ObjectType(ObjectIdentity(self._oid_black_capacity)),
+                   ObjectType(ObjectIdentity(self._oid_tr_belt_capacity)),
+                   ObjectType(ObjectIdentity(self._oid_fuser_capacity)),
+                   )
+        )
+
+        if error_indication:
+            raise Exception('printer snmp error - ip: {} error indication: {}'.format(self.ip, error_indication))
+        elif error_status:
+            raise Exception('printer snmp error - ip: {} error status: {}'.format(self.ip, error_status))
+
+        self.yellow = self._percentage(vals[0][1], vals_max[0][1])
+        self.magenta = self._percentage(vals[1][1], vals_max[1][1])
+        self.cyan = self._percentage(vals[2][1], vals_max[2][1])
+        self.black = self._percentage(vals[3][1], vals_max[3][1])
+        self.tr_belt = self._percentage(vals[4][1], vals_max[4][1])
+        self.fuser = self._percentage(vals[5][1], vals_max[5][1])
+
+
 
 
 '''

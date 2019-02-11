@@ -19,6 +19,8 @@ def create_printers(printers_text):
             printers.append(pr.PrinterBW(p[1], p[0]))
         elif p[2] == 'color':
             printers.append(pr.PrinterColor(p[1], p[0]))
+        elif p[2] == 'hp_color':
+            printers.append(pr.PrinterHpColor(p[1], p[0]))
 
     return printers
 
