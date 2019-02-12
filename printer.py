@@ -285,6 +285,7 @@ class PrinterHpColor(IPrinter):
                    ObjectType(ObjectIdentity(self._oid_black_capacity)),
                    ObjectType(ObjectIdentity(self._oid_tr_belt_capacity)),
                    ObjectType(ObjectIdentity(self._oid_fuser_capacity)),
+                   ObjectType(ObjectIdentity(self._oid_info)),
                    )
         )
 
@@ -299,8 +300,7 @@ class PrinterHpColor(IPrinter):
         self.black = self._percentage(vals[3][1], vals_max[3][1])
         self.tr_belt = self._percentage(vals[4][1], vals_max[4][1])
         self.fuser = self._percentage(vals[5][1], vals_max[5][1])
-
-
+        self.info = vals_max[6][1]
 
 
 '''

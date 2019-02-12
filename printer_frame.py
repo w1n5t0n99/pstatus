@@ -4,6 +4,67 @@ import tkinter.messagebox
 import printer as pr
 import functools
 
+def _generate_detail_str(printer):
+    p = printer
+    # all printers should have black toner
+    if p.black is None:
+        return "ERROR"
+
+
+    if isinstance(printer, pr.PrinterBW):
+        msg = "{}\nBlack: {}\nFuser: {}\nTray 1 Roller: {}\nTray 1 Torque Limiter: {}\nError State: {}".format(
+            p.info,
+            p.black,
+            p.fuser,
+            p.tr1_roller,
+            p.tr1_torque_limiter,
+            p.error_state)
+    elif isinstance(printer, pr.PrinterColor):
+        msg = "{}\nBlack: {} Cyan: {} Magenta: {} Yellow: {}\nFuser: {}\n" \
+              "Tray 1 Roller: {}\nTransfer Belt: {}\nDust Cleaning Kit: {}\n" \
+              "Error State: {}".format(
+            p.info,
+            p.black,
+            p.cyan,
+            p.magenta,
+            p.yellow,
+            p.fuser,
+            p.tr1_roller,
+            p.tr_belt,
+            p.dust_ck,
+            p.error_state)
+    elif isinstance(printer, pr.PrinterHpColor):
+        msg = "{}\nBlack: {} Cyan: {} Magenta: {} Yellow: {}\nFuser: {}".format(
+            p.info,
+            p.black,
+            p.cyan,
+            p.magenta,
+            p.yellow,
+            p.fuser)
+
+    return msg
+
+def _is_printer_warning(printer):
+    p = printer
+    # all printers should have black toner
+    if p.black is None:
+        return False
+
+    if isinstance(printer, pr.PrinterColor):
+        if (p.black == 0) or (p.cyan == 0) or (p.magenta == 0) or (p.yellow == 0):
+            return True
+        if p.error_state is not None:
+            return True
+
+    elif isinstance(printer, pr.PrinterBW):
+        if p.black == 0:
+            return True
+        if p.error_state is not None:
+            return True
+
+    elif isinstance(printer, pr.PrinterHpColor):
+        if (p.black == 0) or (p.cyan == 0) or (p.magenta == 0) or (p.yellow == 0):
+            return True
 
 
 class PrinterFrame:
@@ -52,8 +113,9 @@ class PrinterFrame:
             else:
                 bg_color = self._from_rgb((200, 200, 200))
 
+            self._printer_rows[i][0].config(text=("{}".format(p.name)),
+                                            command=functools.partial(self._printer_detail_mb, i))
 
-            self._printer_rows[i][0].config(text=("{}".format(p.name)), command=functools.partial(self._printer_detail_mb, i))
             self._printer_rows[i][0].grid(row=i, column=0, padx=(15, 0), sticky=N + S + E + W)
             f.grid_rowconfigure(i, weight=1)
 
@@ -70,37 +132,27 @@ class PrinterFrame:
 
     def _printer_detail_mb(self, row):
         p = self._printers[row]
-
-        if p.black is None:
-            msg = "ERROR"
-        elif p.cyan is None:
-            msg = "black: {}\nfuser: {}\ntray 1 roller: {}\ntray 1 torque limiter: {}\nerror state: {}".format(p.black,
-                                                                                                               p.fuser,
-                                                                                                               p.tr1_roller,
-                                                                                                               p.tr1_torque_limiter,
-                                                                                                               p.error_state)
-        else:
-            msg = "black: {} cyan: {} magenta: {} yellow: {}\nfuser: {}\ntray 1 roller: {}\ntransfer belt: {}\nerror state: {}".format(
-                p.black,
-                p.cyan,
-                p.magenta,
-                p.yellow,
-                p.fuser,
-                p.tr1_roller,
-                p.tr_belt,
-                p.error_state)
-
+        msg = _generate_detail_str(p)
         tkinter.messagebox.showinfo(title="{}".format(p.name), message=msg)
 
     def _resize_printer_frame(self, num_to_show):
+
+        first_n_rows_height = 300
+        first_n_columns_width = 400
+
+        if not self._printer_rows:
+            self._printer_canvas.config(width=first_n_columns_width + self.vsb.winfo_width(),
+                                        height=first_n_rows_height)
+            return
 
         if len(self._printer_rows) <= num_to_show:
             n = len(self._printer_rows)
         else:
             n = num_to_show
 
-        first_n_columns_width = self._printer_rows[0][0].winfo_width() + self._printer_rows[0][1].winfo_width()
         first_n_rows_height = 0
+        first_n_columns_width = 0
+        first_n_columns_width = self._printer_rows[0][0].winfo_width() + self._printer_rows[0][1].winfo_width()
 
         for i in range(0, n):
             first_n_rows_height += self._printer_rows[i][0].winfo_height()
@@ -130,26 +182,24 @@ class PrinterFrame:
 
         for p in self._printer_rows:
             p[1].config(text=" ")
+            p[0].config(fg="black")
+
 
     def update_printers(self):
-
-        i=0
-        for p in self._printers:
-            if p.black is None:
-                self._printer_rows[i][1].config(text="ERROR")
-            elif p.cyan is not None:
-                self._printer_rows[i][1].config(text="B: {} C: {} M: {} Y: {}".format(p.black, p.cyan, p.magenta,
-                                                                                      p.yellow))
-            else:
-                self._printer_rows[i][1].config(text="B: {}".format(p.black))
-
-            i += 1
+        for i in range(0, len(self._printer_rows)):
+            self.update_row(i)
 
     def update_row(self, row):
         if row >= len(self._printer_rows):
             assert IndexError
 
         p = self._printers[row]
+
+        if _is_printer_warning(p):
+            self._printer_rows[row][0].config(fg="red")
+        else:
+            self._printer_rows[row][0].config(fg="black")
+
         if p.black is None:
             self._printer_rows[row][1].config(text="ERROR")
         elif p.cyan is not None:
