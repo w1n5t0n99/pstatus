@@ -8,7 +8,8 @@ import printer as pr
 import copier as cp
 import printer_frame as pf
 import printer_icon
-
+#need to fix pyinstaller race condition
+import encodings.idna
 
 _db_file = "printers.txt"
 _printers = []
@@ -74,12 +75,6 @@ def _refresh_printers():
 
 if __name__ == "__main__":
 
-    #needed for pyinstaller and pysnmp
-    try:
-        sys.path.append(os.path.join(sys.MEIPOASS, 'out00-PYZ.pyz'))
-    except:
-        pass
-
     root = Tk()
     root.title("RCPS Printers")
     root.grid_columnconfigure(0, weight=1)
@@ -99,7 +94,6 @@ if __name__ == "__main__":
     _status_label.grid(row=0, column=0, pady=(5, 0), padx=(5, 5), sticky=E + N + W + S)
 
     _load_and_create_printers()
-    #_printers.append(pr.PrinterColor('RHS Lib Color', '172.19.3.4'))
 
     _printer_frame = pf.PrinterFrame(main_frame, 1, 0)
     _printer_frame.set_printers(_printers)

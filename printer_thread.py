@@ -16,9 +16,9 @@ class PrinterThread(threading.Thread):
     def run(self):
         try:
             self._printer.query()
-        except:
-           #self._printer.clear()
-           # print("error {} - {}".format(self._printer.name, self._printer.ip))
+            #print("queried {} - {}".format(self._printer.name, self._printer.ip))
+        except Exception as e:
+           #print("error {} - {}".format(self._printer.name, str(e)))
            pass
 
         self._printer_frame.update_row(self._row)
