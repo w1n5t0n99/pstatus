@@ -1,11 +1,13 @@
 from tkinter import *
-import threading
-import printer_thread
+import os
+import sys
 
+import printer_thread
 import printer_db as db
 import printer as pr
 import copier as cp
 import printer_frame as pf
+import printer_icon
 
 
 _db_file = "printers.txt"
@@ -29,9 +31,17 @@ def _create_printers(printers_text):
     return printers
 
 def _load_and_create_printers():
+    # determine if application is a script file or frozen exe
+    if getattr(sys, 'frozen', False):
+        application_path = os.path.dirname(sys.executable)
+    elif __file__:
+        application_path = os.path.dirname(__file__)
+
+    _db_path = os.path.join(application_path, _db_file)
+
     global _printers
     try:
-        pr_text = db.LoadDB(_db_file)
+        pr_text = db.LoadDB(_db_path)
         _printers = _create_printers(pr_text)
     except Exception:
         _status_label.config(text="Unable to Load Printers")
@@ -64,12 +74,16 @@ def _refresh_printers():
 
 if __name__ == "__main__":
 
+    try:
+        sys.path.append(os.path.join(sys.MEIPOASS, 'out00-PYZ.pyz'))
+    except:
+        pass
 
     root = Tk()
     root.title("RCPS Printers")
     root.grid_columnconfigure(0, weight=1)
     root.grid_rowconfigure(0, weight=1)
-    root.iconbitmap(default="pstatus.ico")
+    root.iconbitmap(default=printer_icon.get_icon_file())
     # Create & Configure frame
     main_frame = Frame(root)
     main_frame.grid(row=0, column=0, sticky=N + S + E + W)
@@ -84,6 +98,7 @@ if __name__ == "__main__":
     _status_label.grid(row=0, column=0, pady=(5, 0), padx=(5, 5), sticky=E + N + W + S)
 
     _load_and_create_printers()
+    #_printers.append(pr.PrinterColor('RHS Lib Color', '172.19.3.4'))
 
     _printer_frame = pf.PrinterFrame(main_frame, 1, 0)
     _printer_frame.set_printers(_printers)
