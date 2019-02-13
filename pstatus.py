@@ -74,6 +74,7 @@ def _refresh_printers():
 
 if __name__ == "__main__":
 
+    #needed for pyinstaller and pysnmp
     try:
         sys.path.append(os.path.join(sys.MEIPOASS, 'out00-PYZ.pyz'))
     except:

@@ -1,5 +1,8 @@
 import base64
 import os
+import sys
+
+icon_file = 'pstatus.ico'
 
 icon64 = '''AAABAAYAEBAAAAEAIABoBAAAZgAAAAAAAAABACAAejwAAM4EAAAwMAAAAQAgAKglAABIQQAAICAA
 AAEAIACoEAAA8GYAAICAAAABACAAKAgBAJh3AABAQAAAAQAgAChCAADAfwEAKAAAABAAAAAgAAAA
@@ -2024,7 +2027,9 @@ AAAAAH/+AAAAAAAAf/8AAAAAAAD//4AAAAAAAf//wAAAAAAD///wAAAAAA////gAAAAAH////AAA
 AAA/////AAAAAP/////AAAAD//////AAAA///////wAA////'''
 
 def get_icon_file():
+    '''
     icondata = base64.b64decode(icon64)
+
     ## The temp file is icon.ico
     tempFile = "icon.ico"
     iconfile = open(tempFile, "wb")
@@ -2032,3 +2037,11 @@ def get_icon_file():
     iconfile.write(icondata)
     iconfile.close()
     return tempFile
+    '''
+    global icon_file
+    if not hasattr(sys, "frozen"):
+        icon_file = os.path.join(os.path.dirname(__file__), icon_file)
+    else:
+        icon_file = os.path.join(sys.prefix, icon_file)
+
+    return icon_file
