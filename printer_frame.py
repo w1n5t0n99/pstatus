@@ -7,11 +7,9 @@ import functools
 def _generate_detail_str(printer):
     p = printer
     # all printers should have black toner
-    if p.black is None:
-        return "ERROR"
-
-
-    if isinstance(printer, pr.PrinterBW):
+    if not p.last_query_status.success:
+        msg = "{}\n{}".format(p.ip, p.last_query_status.msg)
+    elif isinstance(printer, pr.PrinterBW):
         msg = "{}\nBlack: {}\nFuser: {}\nTray 1 Roller: {}\nTray 1 Torque Limiter: {}\nError State: {}".format(
             p.info,
             p.black,
@@ -122,7 +120,8 @@ class PrinterFrame:
             if p.black is None:
                 self._printer_rows[i][1].config(text=" ", bg=bg_color)
             elif p.cyan is not None:
-                self._printer_rows[i][1].config(text="B: {} C: {} M: {} Y: {}".format(p.black, p.cyan, p.magenta, p.yellow),  bg=bg_color,)
+                self._printer_rows[i][1].config(text="B: {} C: {} M: {} Y: {}".format(
+                    p.black, p.cyan, p.magenta, p.yellow),  bg=bg_color,)
             else:
                 self._printer_rows[i][1].config(text="B: {}".format(p.black),  bg=bg_color,)
 
@@ -182,7 +181,9 @@ class PrinterFrame:
 
         for p in self._printer_rows:
             p[1].config(text=" ")
+            p[1].update()
             p[0].config(fg="black")
+            p[0].update()
 
 
     def update_printers(self):

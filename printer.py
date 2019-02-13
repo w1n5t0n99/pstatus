@@ -1,11 +1,16 @@
 from pysnmp.hlapi import *
 from abc import ABCMeta, abstractmethod
+import collections
+
+QueryStatus = collections.namedtuple('QueryStatus', 'success msg')
+
 
 class SnmpCore:
+    com_data = CommunityData('public')
+    context_data = ContextData()
+
     def __init__(self):
         self.engine = SnmpEngine()
-        self.com_data = CommunityData('public')
-        self.context_data = ContextData()
 
 class IPrinter(metaclass=ABCMeta):
     '''base class for printers'''
@@ -15,6 +20,7 @@ class IPrinter(metaclass=ABCMeta):
 
     def __init__(self, name, ip):
         self.core = SnmpCore()
+        self.last_query_status = QueryStatus(success=False, msg="No SNMP query performed")
         self.name = name
         self.ip = ip
         self.error_state = None
@@ -32,6 +38,7 @@ class IPrinter(metaclass=ABCMeta):
         self.tr1_torque_limiter = None
 
     def clear(self):
+        self.last_query_status = QueryStatus(success=False, msg="No SNMP query performed")
         self.error_state = None
         self.info = None
         self.black = None
@@ -127,6 +134,13 @@ class PrinterBW(IPrinter):
                    )
         )
 
+        if error_indication:
+            self.last_query_status = QueryStatus(success=False, msg="{}".format(error_indication))
+            raise Exception('printer snmp error - ip: {} error indication: {}'.format(self.ip, error_indication))
+        elif error_status:
+            self.last_query_status = QueryStatus(success=False, msg="{}".format(error_status))
+            raise Exception('printer snmp error - ip: {} error status: {}'.format(self.ip, error_status))
+
         error_indication, error_status, error_index, vals_max = next(
             getCmd(self.core.engine,
                    self.core.com_data,
@@ -142,10 +156,13 @@ class PrinterBW(IPrinter):
         )
 
         if error_indication:
+            self.last_query_status = QueryStatus(success=False, msg="{}".format(error_indication))
             raise Exception('printer snmp error - ip: {} error indication: {}'.format(self.ip, error_indication))
         elif error_status:
+            self.last_query_status = QueryStatus(success=False, msg="{}".format(error_status))
             raise Exception('printer snmp error - ip: {} error status: {}'.format(self.ip, error_status))
 
+        self.last_query_status = QueryStatus(success=True, msg=" ")
         self.black = self._percentage(vals[0][1], vals_max[0][1])
         self.fuser = self._percentage(vals[1][1], vals_max[1][1])
         self.tr1_roller = self._percentage(vals[2][1], vals_max[2][1])
@@ -200,6 +217,13 @@ class PrinterColor(IPrinter):
                    )
         )
 
+        if error_indication:
+            self.last_query_status = QueryStatus(success=False, msg="{}".format(error_indication))
+            raise Exception('printer snmp error - ip: {} error indication: {}'.format(self.ip, error_indication))
+        elif error_status:
+            self.last_query_status = QueryStatus(success=False, msg="{}".format(error_status))
+            raise Exception('printer snmp error - ip: {} error status: {}'.format(self.ip, error_status))
+
         error_indication, error_status, error_index, vals_max = next(
             getCmd(self.core.engine,
                    self.core.com_data,
@@ -221,10 +245,13 @@ class PrinterColor(IPrinter):
         )
 
         if error_indication:
+            self.last_query_status = QueryStatus(success=False, msg="{}".format(error_indication))
             raise Exception('printer snmp error - ip: {} error indication: {}'.format(self.ip, error_indication))
         elif error_status:
+            self.last_query_status = QueryStatus(success=False, msg="{}".format(error_status))
             raise Exception('printer snmp error - ip: {} error status: {}'.format(self.ip, error_status))
 
+        self.last_query_status = QueryStatus(success=True, msg=" ")
         self.yellow = self._percentage(vals[0][1], vals_max[0][1])
         self.magenta = self._percentage(vals[1][1], vals_max[1][1])
         self.cyan = self._percentage(vals[2][1], vals_max[2][1])
@@ -274,6 +301,13 @@ class PrinterHpColor(IPrinter):
                    )
         )
 
+        if error_indication:
+            self.last_query_status = QueryStatus(success=False, msg="{}".format(error_indication))
+            raise Exception('printer snmp error - ip: {} error indication: {}'.format(self.ip, error_indication))
+        elif error_status:
+            self.last_query_status = QueryStatus(success=False, msg="{}".format(error_status))
+            raise Exception('printer snmp error - ip: {} error status: {}'.format(self.ip, error_status))
+
         error_indication, error_status, error_index, vals_max = next(
             getCmd(self.core.engine,
                    self.core.com_data,
@@ -290,10 +324,13 @@ class PrinterHpColor(IPrinter):
         )
 
         if error_indication:
+            self.last_query_status = QueryStatus(success=False, msg="{}".format(error_indication))
             raise Exception('printer snmp error - ip: {} error indication: {}'.format(self.ip, error_indication))
         elif error_status:
+            self.last_query_status = QueryStatus(success=False, msg="{}".format(error_status))
             raise Exception('printer snmp error - ip: {} error status: {}'.format(self.ip, error_status))
 
+        self.last_query_status = QueryStatus(success=True, msg=" ")
         self.yellow = self._percentage(vals[0][1], vals_max[0][1])
         self.magenta = self._percentage(vals[1][1], vals_max[1][1])
         self.cyan = self._percentage(vals[2][1], vals_max[2][1])
