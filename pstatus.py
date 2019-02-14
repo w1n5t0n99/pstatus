@@ -7,16 +7,27 @@ import printer_db as db
 import printer as pr
 import copier as cp
 import printer_frame as pf
-import printer_icon
 #need to fix pyinstaller race condition
 import encodings.idna
 
 _db_file = "printers.txt"
+_icon_file = 'pstatus.ico'
+
 _printers = []
 _printer_threads = []
 _printer_frame = None
 _status_label = None
 _ref_button = None
+
+
+def _get_icon_file():
+    global _icon_file
+    if not hasattr(sys, "frozen"):
+        icon_file = os.path.join(os.path.dirname(__file__), _icon_file)
+    else:
+        icon_file = os.path.join(sys.prefix, _icon_file)
+
+    return icon_file
 
 
 def _create_printers(printers_text):
@@ -79,7 +90,7 @@ if __name__ == "__main__":
     root.title("RCPS Printers")
     root.grid_columnconfigure(0, weight=1)
     root.grid_rowconfigure(0, weight=1)
-    root.iconbitmap(default=printer_icon.get_icon_file())
+    root.iconbitmap(default=_get_icon_file())
     # Create & Configure frame
     main_frame = Frame(root)
     main_frame.grid(row=0, column=0, sticky=N + S + E + W)
