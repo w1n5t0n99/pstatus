@@ -158,11 +158,23 @@ class PrinterFrame:
 
         self._printer_canvas.config(width=first_n_columns_width + self.vsb.winfo_width(), height=first_n_rows_height)
 
+    def _bind_to_mousewheel(self, event):
+        self._printer_canvas.bind_all("<MouseWheel>", self._on_mousewheel)
+
+    def _unbind_to_mousewheel(self, event):
+        self._printer_canvas.unbind_all("<MouseWheel>")
+
+    def _on_mousewheel(self, event):
+        self._printer_canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+
     def set_printers(self, printers):
         self._printers = printers
         self._printer_list_frame = Frame(self._printer_canvas)
         self._printer_list_frame.columnconfigure(0, weight=1)
         self._printer_list_frame.columnconfigure(1, weight=1)
+
+        self._printer_list_frame.bind('<Enter>', self._bind_to_mousewheel)
+        self._printer_list_frame.bind('<Leave>', self._unbind_to_mousewheel)
 
         self._printer_canvas_window = self._printer_canvas.create_window((0, 0), window=self._printer_list_frame, anchor=N + W)
         self._printer_canvas.bind('<Configure>', self._set_frame_width)
