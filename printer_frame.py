@@ -89,11 +89,7 @@ class PrinterFrame:
         return "#%02x%02x%02x" % rgb
 
     def _set_scroll_region(self):
-        scroll_height = 0
-        for p in self._printer_rows:
-            scroll_height += p[0].winfo_height()
-
-        self._printer_canvas.config(scrollregion=(0, 0, 0, scroll_height))
+        self._printer_canvas.configure(scrollregion = self._printer_canvas.bbox("all"))
 
     def _set_frame_width(self, event):
         canvas_width = event.width
