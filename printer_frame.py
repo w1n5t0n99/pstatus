@@ -162,7 +162,7 @@ class PrinterFrame:
 
     def _on_mousewheel(self, event):
         # do not scroll if canvas larger than contained widget
-        if self._printer_canvas.winfo_height() < self._printer_list_frame.winfo_height():
+        if self._printer_canvas.winfo_height() <= self._printer_list_frame.winfo_height():
             self._printer_canvas.yview_scroll(int(-1*(event.delta/120)), "units")
 
     def set_printers(self, printers):
